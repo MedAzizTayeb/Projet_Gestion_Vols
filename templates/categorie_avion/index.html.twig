@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CategorieAvion index{% endblock %}
+
+{% block body %}
+    <h1>CategorieAvion index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>NomCat</th>
+                <th>Compagnie</th>
+                <th>Description</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for categorie_avion in categorie_avions %}
+            <tr>
+                <td>{{ categorie_avion.id }}</td>
+                <td>{{ categorie_avion.nomCat }}</td>
+                <td>{{ categorie_avion.compagnie }}</td>
+                <td>{{ categorie_avion.description }}</td>
+                <td>
+                    <a href="{{ path('app_categorie_avion_show', {'id': categorie_avion.id}) }}">show</a>
+                    <a href="{{ path('app_categorie_avion_edit', {'id': categorie_avion.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_categorie_avion_new') }}">Create new</a>
+{% endblock %}

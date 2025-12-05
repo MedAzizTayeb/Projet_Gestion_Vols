@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Aeroport index{% endblock %}
+
+{% block body %}
+    <h1>Aeroport index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>CodeIATA</th>
+                <th>Nom</th>
+                <th>Ville</th>
+                <th>Pays</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for aeroport in aeroports %}
+            <tr>
+                <td>{{ aeroport.id }}</td>
+                <td>{{ aeroport.codeIATA }}</td>
+                <td>{{ aeroport.nom }}</td>
+                <td>{{ aeroport.ville }}</td>
+                <td>{{ aeroport.pays }}</td>
+                <td>
+                    <a href="{{ path('app_aeroport_show', {'id': aeroport.id}) }}">show</a>
+                    <a href="{{ path('app_aeroport_edit', {'id': aeroport.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_aeroport_new') }}">Create new</a>
+{% endblock %}

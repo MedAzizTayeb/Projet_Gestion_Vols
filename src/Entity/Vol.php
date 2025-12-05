@@ -48,9 +48,16 @@ class Vol
     #[ORM\ManyToOne(inversedBy: 'vols')]
     private ?Avion $avion = null;
 
+    /**
+     * @var Collection<int, Ticket>
+     */
+    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'vol')]
+    private Collection $tickets;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
+        $this->tickets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -192,6 +199,36 @@ class Vol
     public function setAvion(?Avion $avion): static
     {
         $this->avion = $avion;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ticket>
+     */
+    public function getTickets(): Collection
+    {
+        return $this->tickets;
+    }
+
+    public function addTicket(Ticket $ticket): static
+    {
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets->add($ticket);
+            $ticket->setVol($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTicket(Ticket $ticket): static
+    {
+        if ($this->tickets->removeElement($ticket)) {
+            // set the owning side to null (unless already changed)
+            if ($ticket->getVol() === $this) {
+                $ticket->setVol(null);
+            }
+        }
 
         return $this;
     }

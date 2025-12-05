@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Aeroport{% endblock %}
+
+{% block body %}
+    <h1>Create new Aeroport</h1>
+
+    {{ include('aeroport/_form.html.twig') }}
+
+    <a href="{{ path('app_aeroport_index') }}">back to list</a>
+{% endblock %}

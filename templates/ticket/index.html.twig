@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ticket index{% endblock %}
+
+{% block body %}
+    <h1>Ticket index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>IdTicket</th>
+                <th>Numero</th>
+                <th>DateCreation</th>
+                <th>PdfPath</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.id }}</td>
+                <td>{{ ticket.idTicket }}</td>
+                <td>{{ ticket.numero }}</td>
+                <td>{{ ticket.dateCreation ? ticket.dateCreation|date('Y-m-d') : '' }}</td>
+                <td>{{ ticket.pdfPath }}</td>
+                <td>
+                    <a href="{{ path('app_ticket_show', {'id': ticket.id}) }}">show</a>
+                    <a href="{{ path('app_ticket_edit', {'id': ticket.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_ticket_new') }}">Create new</a>
+{% endblock %}

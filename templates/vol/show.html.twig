@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vol{% endblock %}
+
+{% block body %}
+    <h1>Vol</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ vol.id }}</td>
+            </tr>
+            <tr>
+                <th>NumVol</th>
+                <td>{{ vol.NumVol }}</td>
+            </tr>
+            <tr>
+                <th>DateDepart</th>
+                <td>{{ vol.DateDepart ? vol.DateDepart|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>DateArrive</th>
+                <td>{{ vol.DateArrive ? vol.DateArrive|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Port</th>
+                <td>{{ vol.port }}</td>
+            </tr>
+            <tr>
+                <th>Escale</th>
+                <td>{{ vol.escale }}</td>
+            </tr>
+            <tr>
+                <th>PlacesDisponibles</th>
+                <td>{{ vol.placesDisponibles }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_vol_index') }}">back to list</a>
+
+    <a href="{{ path('app_vol_edit', {'id': vol.id}) }}">edit</a>
+
+    {{ include('vol/_delete_form.html.twig') }}
+{% endblock %}
