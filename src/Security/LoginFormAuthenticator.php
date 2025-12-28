@@ -15,15 +15,18 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Doctrine\ORM\EntityManagerInterface;
 
-class LoginFromAuthenticator extends AbstractLoginFormAuthenticator
+class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
     public const LOGIN_ROUTE = 'app_login';
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
-    {
+    public function __construct(
+        private UrlGeneratorInterface $urlGenerator,
+        private EntityManagerInterface $entityManager
+    ) {
     }
 
     public function authenticate(Request $request): Passport
@@ -44,13 +47,33 @@ class LoginFromAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        // Mettre à jour la dernière connexion pour les administrateurs
+        $user = $token->getUser();
+        if (method_exists($user, 'setDernierConnexion')) {
+            $user->setDernierConnexion(new \DateTime());
+            $this->entityManager->flush();
+        }
+
+        // Si l'utilisateur avait une page cible, rediriger vers celle-ci
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
-        // For example:
-        // return new RedirectResponse($this->urlGenerator->generate('some_route'));
-        throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
+        // Redirection selon le rôle
+        $roles = $token->getRoleNames();
+
+        // Administrateur -> Dashboard Admin
+        if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_SUPER_ADMIN', $roles)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
+        }
+
+        // Client -> Espace Client
+        if (in_array('ROLE_USER', $roles)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_client_dashboard'));
+        }
+
+        // Par défaut -> Page d'accueil
+        return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
 
     protected function getLoginUrl(Request $request): string

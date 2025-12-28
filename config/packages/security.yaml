@@ -1,61 +1,84 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # Configuration des hashers de mot de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\Entity\Administrateur:
+            algorithm: auto
+        App\Entity\Utilisateur:
+            algorithm: auto
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    # Providers pour Admin et User
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
-        app_user_provider:
+        # Provider pour les administrateurs
+        admin_provider:
+            entity:
+                class: App\Entity\Administrateur
+                property: email
+
+        # Provider pour les clients/utilisateurs
+        user_provider:
             entity:
                 class: App\Entity\Utilisateur
                 property: email
 
+        # Provider combiné qui cherche dans les deux entités
+        combined_provider:
+            chain:
+                providers: ['admin_provider', 'user_provider']
+
     firewalls:
         dev:
-            # Ensure dev tools and static assets are always allowed
-            pattern: ^/(_profiler|_wdt|assets|build)/
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: app_user_provider
+            provider: combined_provider
 
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                enable_csrf: true
-                default_target_path: /
+            custom_authenticator: App\Security\LoginFormAuthenticator
 
             logout:
                 path: app_logout
-                target: /
+                target: app_home
 
             remember_me:
                 secret: '%kernel.secret%'
-                lifetime: 604800
+                lifetime: 604800 # 1 semaine
                 path: /
-                # by default, the feature is enabled by checking a checkbox in the
-                # login form, uncomment the following line to always enable it.
-                #always_remember_me: true
+                always_remember_me: true
 
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
+            # Activation de la vérification des utilisateurs
+            entry_point: App\Security\LoginFormAuthenticator
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-
-    # Note: Only the *first* matching rule is applied
+    # Contrôle d'accès
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Routes publiques
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+
+        # Routes admin (nécessite ROLE_ADMIN)
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/administrateur, roles: ROLE_ADMIN }
+
+        # Routes client (nécessite ROLE_USER)
+        - { path: ^/client, roles: ROLE_USER }
+
+        # Routes partagées (authentification requise)
+        - { path: ^/reservation, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/ticket, roles: IS_AUTHENTICATED_FULLY }
+
+    # Configuration des rôles hiérarchiques
+    role_hierarchy:
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_USER]
+        ROLE_ADMIN: [ROLE_USER]
 
 when@test:
     security:
         password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
+            # Configuration pour les tests
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4 # Valeur minimale pour bcrypt
+                time_cost: 3 # Valeur minimale pour argon
+                memory_cost: 10 # Valeur minimale pour argon

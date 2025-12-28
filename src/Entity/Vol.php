@@ -54,10 +54,18 @@ class Vol
     #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'vol')]
     private Collection $tickets;
 
+    #[ORM\ManyToOne(inversedBy: 'volsCrees')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Administrateur $creePar = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $statut = null;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
         $this->tickets = new ArrayCollection();
+        $this->statut = 'planifié';
     }
 
     public function getId(): ?int
@@ -73,7 +81,6 @@ class Vol
     public function setNumVol(string $NumVol): static
     {
         $this->NumVol = $NumVol;
-
         return $this;
     }
 
@@ -85,7 +92,6 @@ class Vol
     public function setDateDepart(\DateTime $DateDepart): static
     {
         $this->DateDepart = $DateDepart;
-
         return $this;
     }
 
@@ -97,7 +103,6 @@ class Vol
     public function setDateArrive(\DateTime $DateArrive): static
     {
         $this->DateArrive = $DateArrive;
-
         return $this;
     }
 
@@ -109,7 +114,6 @@ class Vol
     public function setPort(string $port): static
     {
         $this->port = $port;
-
         return $this;
     }
 
@@ -121,7 +125,6 @@ class Vol
     public function setEscale(?string $escale): static
     {
         $this->escale = $escale;
-
         return $this;
     }
 
@@ -133,7 +136,6 @@ class Vol
     public function setPlacesDisponibles(int $placesDisponibles): static
     {
         $this->placesDisponibles = $placesDisponibles;
-
         return $this;
     }
 
@@ -151,19 +153,16 @@ class Vol
             $this->reservations->add($reservation);
             $reservation->setVol($this);
         }
-
         return $this;
     }
 
     public function removeReservation(Reservation $reservation): static
     {
         if ($this->reservations->removeElement($reservation)) {
-            // set the owning side to null (unless already changed)
             if ($reservation->getVol() === $this) {
                 $reservation->setVol(null);
             }
         }
-
         return $this;
     }
 
@@ -175,7 +174,6 @@ class Vol
     public function setDepart(?Aeroport $depart): static
     {
         $this->depart = $depart;
-
         return $this;
     }
 
@@ -187,7 +185,6 @@ class Vol
     public function setArrivee(?Aeroport $arrivee): static
     {
         $this->arrivee = $arrivee;
-
         return $this;
     }
 
@@ -199,7 +196,6 @@ class Vol
     public function setAvion(?Avion $avion): static
     {
         $this->avion = $avion;
-
         return $this;
     }
 
@@ -217,19 +213,43 @@ class Vol
             $this->tickets->add($ticket);
             $ticket->setVol($this);
         }
-
         return $this;
     }
 
     public function removeTicket(Ticket $ticket): static
     {
         if ($this->tickets->removeElement($ticket)) {
-            // set the owning side to null (unless already changed)
             if ($ticket->getVol() === $this) {
                 $ticket->setVol(null);
             }
         }
-
         return $this;
+    }
+
+    public function getCreePar(): ?Administrateur
+    {
+        return $this->creePar;
+    }
+
+    public function setCreePar(?Administrateur $creePar): static
+    {
+        $this->creePar = $creePar;
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(?string $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->NumVol . ' - ' . $this->getDepart()?->getVille() . ' → ' . $this->getArrivee()?->getVille();
     }
 }

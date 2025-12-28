@@ -33,9 +33,24 @@ class Avion
     #[ORM\ManyToOne(inversedBy: 'avions')]
     private ?CategorieAvion $categorie = null;
 
+    #[ORM\ManyToOne(inversedBy: 'avionsGeres')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Administrateur $gerePar = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $immatriculation = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $heuresVol = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $derniereMaintenance = null;
+
     public function __construct()
     {
         $this->vols = new ArrayCollection();
+        $this->disponibilite = true;
+        $this->heuresVol = 0;
     }
 
     public function getId(): ?int
@@ -51,7 +66,6 @@ class Avion
     public function setModele(string $modele): static
     {
         $this->modele = $modele;
-
         return $this;
     }
 
@@ -63,7 +77,6 @@ class Avion
     public function setCapacite(int $capacite): static
     {
         $this->capacite = $capacite;
-
         return $this;
     }
 
@@ -75,7 +88,6 @@ class Avion
     public function setDisponibilite(bool $disponibilite): static
     {
         $this->disponibilite = $disponibilite;
-
         return $this;
     }
 
@@ -93,19 +105,16 @@ class Avion
             $this->vols->add($vol);
             $vol->setAvion($this);
         }
-
         return $this;
     }
 
     public function removeVol(Vol $vol): static
     {
         if ($this->vols->removeElement($vol)) {
-            // set the owning side to null (unless already changed)
             if ($vol->getAvion() === $this) {
                 $vol->setAvion(null);
             }
         }
-
         return $this;
     }
 
@@ -117,7 +126,55 @@ class Avion
     public function setCategorie(?CategorieAvion $categorie): static
     {
         $this->categorie = $categorie;
-
         return $this;
+    }
+
+    public function getGerePar(): ?Administrateur
+    {
+        return $this->gerePar;
+    }
+
+    public function setGerePar(?Administrateur $gerePar): static
+    {
+        $this->gerePar = $gerePar;
+        return $this;
+    }
+
+    public function getImmatriculation(): ?string
+    {
+        return $this->immatriculation;
+    }
+
+    public function setImmatriculation(?string $immatriculation): static
+    {
+        $this->immatriculation = $immatriculation;
+        return $this;
+    }
+
+    public function getHeuresVol(): ?int
+    {
+        return $this->heuresVol;
+    }
+
+    public function setHeuresVol(?int $heuresVol): static
+    {
+        $this->heuresVol = $heuresVol;
+        return $this;
+    }
+
+    public function getDerniereMaintenance(): ?\DateTimeInterface
+    {
+        return $this->derniereMaintenance;
+    }
+
+    public function setDerniereMaintenance(?\DateTimeInterface $derniereMaintenance): static
+    {
+        $this->derniereMaintenance = $derniereMaintenance;
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->modele . ' (' . $this->immatriculation . ')';
     }
 }
