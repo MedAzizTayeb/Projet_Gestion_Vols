@@ -200,6 +200,14 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
+    #[Route('/vols/{id}', name: 'app_admin_vols_show', methods: ['GET'], priority: 2)]
+    public function volsShow(Vol $vol): Response
+    {
+        return $this->render('administrateur/vols/show.html.twig', [
+            'vol' => $vol,
+        ]);
+    }
+
     #[Route('/vols/{id}/edit', name: 'app_admin_vols_edit', methods: ['GET', 'POST'])]
     public function volsEdit(Request $request, Vol $vol, EntityManagerInterface $entityManager): Response
     {
@@ -263,6 +271,14 @@ class AdministrateurController extends AbstractController
         return $this->render('administrateur/avions/new.html.twig', [
             'avion' => $avion,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/avions/{id}', name: 'app_admin_avions_show', methods: ['GET'])]
+    public function avionsShow(Avion $avion): Response
+    {
+        return $this->render('administrateur/avions/show.html.twig', [
+            'avion' => $avion,
         ]);
     }
 

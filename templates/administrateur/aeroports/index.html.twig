@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Aéroports - AeroManager{% endblock %}
+
+{% block body %}
+    <style>
+        .aeroport-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 4px solid #17a2b8;
+        }
+        .aeroport-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .code-iata {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #17a2b8;
+            font-family: monospace;
+        }
+        .flag-icon {
+            font-size: 2rem;
+            margin-right: 0.5rem;
+        }
+        .airport-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-building text-info"></i> Gestion des Aéroports</h1>
+                <p class="text-muted">Gérez votre réseau d'aéroports</p>
+            </div>
+            <div>
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+                <a href="{{ path('app_admin_aeroports_new') }}" class="btn btn-info">
+                    <i class="fas fa-plus"></i> Nouvel Aéroport
+                </a>
+            </div>
+        </div>
+
+        {% if aeroports is empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-building fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                <h3 class="text-muted">Aucun aéroport enregistré</h3>
+                <p class="text-muted">Commencez par ajouter votre premier aéroport</p>
+                <a href="{{ path('app_admin_aeroports_new') }}" class="btn btn-info mt-3">
+                    <i class="fas fa-plus"></i> Ajouter un Aéroport
+                </a>
+            </div>
+        {% else %}
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>{{ aeroports|length }}</strong> aéroport(s) enregistré(s) dans le système
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                {% for aeroport in aeroports %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="aeroport-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <div class="code-iata mb-2">{{ aeroport.codeIATA }}</div>
+                                    <div class="airport-name">{{ aeroport.nom }}</div>
+                                </div>
+                                <span class="flag-icon">🏢</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                    <strong>{{ aeroport.ville }}</strong>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-globe text-primary me-2"></i>
+                                    <span>{{ aeroport.pays }}</span>
+                                </div>
+                                <div class="d-flex align-items-center text-muted">
+                                    <i class="fas fa-plane-departure me-2"></i>
+                                    <small>{{ aeroport.vols|length }} vol(s) associé(s)</small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_admin_aeroports_show', {'id': aeroport.id}) }}"
+                                   class="btn btn-sm btn-info flex-fill">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                                <a href="{{ path('app_admin_aeroports_edit', {'id': aeroport.id}) }}"
+                                   class="btn btn-sm btn-warning flex-fill">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                                <form method="post" action="{{ path('app_admin_aeroports_delete', {'id': aeroport.id}) }}"
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet aéroport ? Cette action supprimera également tous les vols associés.');"
+                                      style="flex: 1;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ aeroport.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-danger w-100">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Carte du monde conceptuelle -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-map"></i> Réseau d'Aéroports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% set pays_list = {} %}
+                        {% for aeroport in aeroports %}
+                            {% set pays_list = pays_list|merge({(aeroport.pays): (pays_list[aeroport.pays]|default(0) + 1)}) %}
+                        {% endfor %}
+
+                        {% for pays, count in pays_list %}
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    <h6><i class="fas fa-flag"></i> {{ pays }}</h6>
+                                    <p class="text-muted mb-0">{{ count }} aéroport(s)</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Avion - AeroManager{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="mb-4">
+            <a href="{{ path('app_admin_avions_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="row">
+            <!-- Informations principales -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-plane"></i> Informations Avion</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="display-1 text-success">
+                                <i class="fas fa-plane-departure"></i>
+                            </div>
+                        </div>
+
+                        <h4 class="text-center mb-4">{{ avion.modele }}</h4>
+
+                        {% if avion.immatriculation %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Immatriculation</label>
+                                <div class="fw-bold" style="font-family: monospace; font-size: 1.2rem;">
+                                    {{ avion.immatriculation }}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Capacité</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users text-info me-2"></i>
+                                <strong>{{ avion.capacite }} passagers</strong>
+                            </div>
+                        </div>
+
+                        {% if avion.heuresVol %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Heures de vol</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    <strong>{{ avion.heuresVol }} heures</strong>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if avion.categorie %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Catégorie</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-tag text-warning me-2"></i>
+                                    <strong>{{ avion.categorie.nomCat }}</strong>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if avion.derniereMaintenance %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Dernière maintenance</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-tools text-danger me-2"></i>
+                                    <strong>{{ avion.derniereMaintenance|date('d/m/Y') }}</strong>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Statut</label>
+                            <div>
+                                {% if avion.disponibilite %}
+                                    <span class="badge bg-success">Disponible</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Indisponible</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if avion.gerePar %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Géré par</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-shield text-secondary me-2"></i>
+                                    <strong>{{ avion.gerePar.nomComplet }}</strong>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_admin_avions_edit', {'id': avion.id}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <form method="post" action="{{ path('app_admin_avions_delete', {'id': avion.id}) }}"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avion ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avion.id) }}">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vols associés -->
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plane-departure"></i>
+                            Vols programmés
+                            <span class="badge bg-light text-primary">{{ avion.vols|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if avion.vols is empty %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-plane fa-3x text-muted mb-3" style="opacity: 0.3;"></i>
+                                <p class="text-muted">Aucun vol programmé pour cet avion</p>
+                                <a href="{{ path('app_admin_vols_new') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Créer un vol
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>N° Vol</th>
+                                        <th>Route</th>
+                                        <th>Date Départ</th>
+                                        <th>Places</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for vol in avion.vols %}
+                                        <tr>
+                                            <td><strong>{{ vol.numVol }}</strong></td>
+                                            <td>
+                                                <strong>{{ vol.depart.codeIATA }}</strong>
+                                                <i class="fas fa-arrow-right text-muted mx-1"></i>
+                                                <strong>{{ vol.arrivee.codeIATA }}</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ vol.depart.ville }} → {{ vol.arrivee.ville }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {{ vol.dateDepart|date('d/m/Y') }}
+                                                <br>
+                                                <small class="text-muted">{{ vol.dateDepart|date('H:i') }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ vol.placesDisponibles }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ vol.statut|default('planifié') }}</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-primary mb-0">{{ avion.vols|length }}</h3>
+                                    <small class="text-muted">Vols programmés</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set vols_futurs = avion.vols|filter(v => v.dateDepart > date()) %}
+                                    <h3 class="text-success mb-0">{{ vols_futurs|length }}</h3>
+                                    <small class="text-muted">Vols à venir</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-info mb-0">{{ avion.capacite }}</h3>
+                                    <small class="text-muted">Capacité max</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-warning mb-0">{{ avion.heuresVol ?: 0 }}</h3>
+                                    <small class="text-muted">Heures de vol</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

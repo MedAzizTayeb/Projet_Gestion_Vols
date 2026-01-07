@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Avions - AeroManager{% endblock %}
+
+{% block body %}
+    <style>
+        .avion-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .avion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .badge-disponible {
+            background: #28a745;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        .badge-indisponible {
+            background: #dc3545;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+    </style>
+
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-plane-departure text-primary"></i> Gestion des Avions</h1>
+                <p class="text-muted">Gérez votre flotte d'avions</p>
+            </div>
+            <div>
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+                <a href="{{ path('app_admin_avions_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvel Avion
+                </a>
+            </div>
+        </div>
+
+        {% if avions is empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-plane-departure fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                <h3 class="text-muted">Aucun avion enregistré</h3>
+                <p class="text-muted">Commencez par ajouter votre premier avion à la flotte</p>
+                <a href="{{ path('app_admin_avions_new') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus"></i> Ajouter un Avion
+                </a>
+            </div>
+        {% else %}
+            <div class="row">
+                {% for avion in avions %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="avion-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="mb-1"><i class="fas fa-plane"></i> {{ avion.modele }}</h5>
+                                    <small class="text-muted">{{ avion.immatriculation ?: 'Sans immatriculation' }}</small>
+                                </div>
+                                <span class="badge-{{ avion.disponibilite ? 'disponible' : 'indisponible' }}">
+                                    {{ avion.disponibilite ? 'Disponible' : 'Indisponible' }}
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted"><i class="fas fa-users"></i> Capacité:</span>
+                                    <strong>{{ avion.capacite }} passagers</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted"><i class="fas fa-clock"></i> Heures de vol:</span>
+                                    <strong>{{ avion.heuresVol ?: '0' }}h</strong>
+                                </div>
+                                {% if avion.categorie %}
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted"><i class="fas fa-tag"></i> Catégorie:</span>
+                                        <strong>{{ avion.categorie.nomCat }}</strong>
+                                    </div>
+                                {% endif %}
+                                {% if avion.derniereMaintenance %}
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted"><i class="fas fa-tools"></i> Dernière maintenance:</span>
+                                        <strong>{{ avion.derniereMaintenance|date('d/m/Y') }}</strong>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex gap-2 mb-2">
+                                <a href="{{ path('app_admin_avions_show', {'id': avion.id}) }}" class="btn btn-sm btn-info w-100">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_admin_avions_edit', {'id': avion.id}) }}" class="btn btn-sm btn-warning flex-fill">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                                <form method="post" action="{{ path('app_admin_avions_delete', {'id': avion.id}) }}"
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avion ?');" class="flex-fill">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avion.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-danger w-100">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

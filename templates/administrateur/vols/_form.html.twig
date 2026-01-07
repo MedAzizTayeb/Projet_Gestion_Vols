@@ -1,0 +1,106 @@
+{{ form_start(form) }}
+<div class="row">
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.NumVol, 'Numéro de vol', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        {{ form_widget(form.NumVol, {'attr': {'class': 'form-control', 'placeholder': 'Ex: AF1234'}}) }}
+        <small class="form-text text-muted">Code unique identifiant le vol</small>
+        {{ form_errors(form.NumVol) }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.avion, 'Avion', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-plane"></i></span>
+            {{ form_widget(form.avion, {'attr': {'class': 'form-select'}}) }}
+        </div>
+        {{ form_errors(form.avion) }}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.depart, 'Aéroport de départ', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-plane-departure text-primary"></i></span>
+            {{ form_widget(form.depart, {'attr': {'class': 'form-select'}}) }}
+        </div>
+        {{ form_errors(form.depart) }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.arrivee, 'Aéroport d\'arrivée', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-plane-arrival text-success"></i></span>
+            {{ form_widget(form.arrivee, {'attr': {'class': 'form-select'}}) }}
+        </div>
+        {{ form_errors(form.arrivee) }}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.DateDepart, 'Date et heure de départ', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+            {{ form_widget(form.DateDepart, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <small class="form-text text-muted">Date et heure en temps local</small>
+        {{ form_errors(form.DateDepart) }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.DateArrive, 'Date et heure d\'arrivée', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+            {{ form_widget(form.DateArrive, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <small class="form-text text-muted">Date et heure en temps local</small>
+        {{ form_errors(form.DateArrive) }}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        {{ form_label(form.port, 'Porte d\'embarquement', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-door-open"></i></span>
+            {{ form_widget(form.port, {'attr': {'class': 'form-control', 'placeholder': 'Ex: A12'}}) }}
+        </div>
+        {{ form_errors(form.port) }}
+    </div>
+
+    <div class="col-md-4 mb-3">
+        {{ form_label(form.escale, 'Escale(s)', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-exchange-alt"></i></span>
+            {{ form_widget(form.escale, {'attr': {'class': 'form-control', 'placeholder': 'Ex: CDG, LHR'}}) }}
+        </div>
+        <small class="form-text text-muted">Codes IATA séparés par virgules (optionnel)</small>
+        {{ form_errors(form.escale) }}
+    </div>
+
+    <div class="col-md-4 mb-3">
+        {{ form_label(form.placesDisponibles, 'Places disponibles', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-chair"></i></span>
+            {{ form_widget(form.placesDisponibles, {'attr': {'class': 'form-control', 'placeholder': 'Nombre'}}) }}
+        </div>
+        <small class="form-text text-muted">Nombre de sièges à vendre</small>
+        {{ form_errors(form.placesDisponibles) }}
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i>
+    <strong>Rappel:</strong> Les horaires doivent être en temps local et l'avion doit être disponible.
+</div>
+
+<div class="d-flex gap-2 justify-content-end mt-3">
+    <a href="{{ path('app_vol_index') }}" class="btn btn-secondary">
+        <i class="fas fa-times"></i> Annuler
+    </a>
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> {{ button_label|default('Enregistrer') }}
+    </button>
+</div>
+{{ form_end(form) }}

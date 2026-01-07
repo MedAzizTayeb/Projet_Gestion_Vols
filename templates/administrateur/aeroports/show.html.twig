@@ -1,0 +1,169 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Aéroport - AeroManager{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="mb-4">
+            <a href="{{ path('app_admin_aeroports_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="row">
+            <!-- Informations principales -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-building"></i> Informations Aéroport</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="display-1 text-info" style="font-family: monospace; font-weight: bold;">
+                                {{ aeroport.codeIATA }}
+                            </div>
+                            <small class="text-muted">Code IATA</small>
+                        </div>
+
+                        <h4 class="text-center mb-4">{{ aeroport.nom }}</h4>
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Ville</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-city text-info me-2"></i>
+                                <strong>{{ aeroport.ville }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Pays</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-flag text-primary me-2"></i>
+                                <strong>{{ aeroport.pays }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Vols associés</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-plane-departure text-success me-2"></i>
+                                <strong>{{ aeroport.vols|length }} vol(s)</strong>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_admin_aeroports_edit', {'id': aeroport.id}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <form method="post" action="{{ path('app_admin_aeroports_delete', {'id': aeroport.id}) }}"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet aéroport ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ aeroport.id) }}">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vols associés -->
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plane-departure"></i>
+                            Vols au départ de {{ aeroport.codeIATA }}
+                            <span class="badge bg-light text-primary">{{ aeroport.vols|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if aeroport.vols is empty %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-plane fa-3x text-muted mb-3" style="opacity: 0.3;"></i>
+                                <p class="text-muted">Aucun vol au départ de cet aéroport</p>
+                                <a href="{{ path('app_admin_vols_new') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Créer un vol
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>N° Vol</th>
+                                        <th>Destination</th>
+                                        <th>Date Départ</th>
+                                        <th>Places</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for vol in aeroport.vols %}
+                                        <tr>
+                                            <td><strong>{{ vol.numVol }}</strong></td>
+                                            <td>
+                                                <i class="fas fa-arrow-right text-muted"></i>
+                                                <strong>{{ vol.arrivee.codeIATA }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ vol.arrivee.ville }}</small>
+                                            </td>
+                                            <td>
+                                                {{ vol.dateDepart|date('d/m/Y') }}
+                                                <br>
+                                                <small class="text-muted">{{ vol.dateDepart|date('H:i') }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ vol.placesDisponibles }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ vol.statut|default('planifié') }}</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-primary mb-0">{{ aeroport.vols|length }}</h3>
+                                    <small class="text-muted">Vols au départ</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set vols_futurs = aeroport.vols|filter(v => v.dateDepart > date()) %}
+                                    <h3 class="text-success mb-0">{{ vols_futurs|length }}</h3>
+                                    <small class="text-muted">Vols à venir</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set places_totales = 0 %}
+                                    {% for vol in aeroport.vols %}
+                                        {% set places_totales = places_totales + vol.placesDisponibles %}
+                                    {% endfor %}
+                                    <h3 class="text-info mb-0">{{ places_totales }}</h3>
+                                    <small class="text-muted">Places disponibles</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

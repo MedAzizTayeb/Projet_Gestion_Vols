@@ -1,0 +1,326 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Espace Client - AeroManager{% endblock %}
+
+{% block body %}
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+        }
+        .stat-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .vol-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 4px solid #007bff;
+        }
+        .vol-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .flight-route {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .airport-code {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .action-card {
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .reservation-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+    </style>
+
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="fas fa-user-circle"></i>
+                        Bonjour, {{ client.user.prenom }} !
+                    </h1>
+                    <p class="mb-0 opacity-75">Bienvenue dans votre espace personnel</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ path('app_client_profil') }}" class="btn btn-light">
+                        <i class="fas fa-user-cog"></i> Mon Profil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistiques rapides -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stat-card card border-left-primary" style="border-left: 4px solid #007bff;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-uppercase text-primary fw-bold small mb-1">
+                                    Mes Réservations
+                                </div>
+                                <div class="h2 mb-0 fw-bold">{{ reservations|length }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clipboard-list fa-2x text-primary" style="opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="stat-card card border-left-success" style="border-left: 4px solid #28a745;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-uppercase text-success fw-bold small mb-1">
+                                    Mes Tickets
+                                </div>
+                                <div class="h2 mb-0 fw-bold">{{ tickets|length }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-ticket-alt fa-2x text-success" style="opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="stat-card card border-left-info" style="border-left: 4px solid #17a2b8;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-uppercase text-info fw-bold small mb-1">
+                                    Vols Disponibles
+                                </div>
+                                <div class="h2 mb-0 fw-bold">{{ vols_disponibles|length }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-plane fa-2x text-info" style="opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <a href="{{ path('app_vol_index') }}" class="action-card bg-primary text-white">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <h5>Rechercher un Vol</h5>
+                    <p class="mb-0">Trouvez votre prochain voyage</p>
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="{{ path('app_client_reservations') }}" class="action-card bg-success text-white">
+                    <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                    <h5>Mes Réservations</h5>
+                    <p class="mb-0">Consultez vos réservations</p>
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="{{ path('app_client_tickets') }}" class="action-card bg-info text-white">
+                    <i class="fas fa-ticket-alt fa-3x mb-3"></i>
+                    <h5>Mes Tickets</h5>
+                    <p class="mb-0">Accédez à vos billets</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Vols disponibles -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-plane-departure"></i> Vols Disponibles
+                    <span class="badge bg-light text-primary">{{ vols_disponibles|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if vols_disponibles is empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-plane fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                        <h4 class="text-muted">Aucun vol disponible pour le moment</h4>
+                        <p class="text-muted">Revenez bientôt pour découvrir nos prochains vols !</p>
+                    </div>
+                {% else %}
+                    <div class="row">
+                        {% for vol in vols_disponibles %}
+                            <div class="col-md-6 mb-3">
+                                <div class="vol-card">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0"><i class="fas fa-plane"></i> {{ vol.numVol }}</h6>
+                                        <span class="badge bg-info">{{ vol.placesDisponibles }} places</span>
+                                    </div>
+
+                                    <div class="flight-route">
+                                        <div class="text-center">
+                                            <div class="airport-code">{{ vol.depart.codeIATA }}</div>
+                                            <small class="text-muted">{{ vol.depart.ville }}</small>
+                                        </div>
+                                        <div class="flex-grow-1 text-center">
+                                            <i class="fas fa-arrow-right fa-2x text-muted"></i>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="airport-code">{{ vol.arrivee.codeIATA }}</div>
+                                            <small class="text-muted">{{ vol.arrivee.ville }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <i class="fas fa-calendar text-primary"></i>
+                                            <strong>{{ vol.dateDepart|date('d/m/Y') }}</strong>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-clock text-success"></i>
+                                            <strong>{{ vol.dateDepart|date('H:i') }}</strong>
+                                        </div>
+                                    </div>
+
+                                    <a href="{{ path('app_vol_show', {'id': vol.id}) }}" class="btn btn-primary w-100">
+                                        <i class="fas fa-info-circle"></i> Voir les détails
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="{{ path('app_vol_index') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-search"></i> Voir tous les vols
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mes dernières réservations -->
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-clipboard-list"></i> Mes Dernières Réservations
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if reservations is empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                        <h4 class="text-muted">Aucune réservation</h4>
+                        <p class="text-muted">Commencez par réserver votre premier vol !</p>
+                        <a href="{{ path('app_vol_index') }}" class="btn btn-success mt-3">
+                            <i class="fas fa-plus"></i> Réserver un vol
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Référence</th>
+                                <th>Vol</th>
+                                <th>Date Départ</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for reservation in reservations|slice(0, 5) %}
+                                <tr>
+                                    <td><strong>{{ reservation.reference }}</strong></td>
+                                    <td>
+                                        {% if reservation.vol %}
+                                            <strong>{{ reservation.vol.numVol }}</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                {{ reservation.vol.depart.codeIATA }} → {{ reservation.vol.arrivee.codeIATA }}
+                                            </small>
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reservation.vol %}
+                                            {{ reservation.vol.dateDepart|date('d/m/Y H:i') }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reservation.satut == 'confirmé' %}
+                                            <span class="badge bg-success">Confirmé</span>
+                                        {% elseif reservation.satut == 'en attente' %}
+                                            <span class="badge bg-warning">En attente</span>
+                                        {% elseif reservation.satut == 'annulé' %}
+                                            <span class="badge bg-danger">Annulé</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ reservation.satut }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if reservations|length > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{{ path('app_client_reservations') }}" class="btn btn-outline-success">
+                                <i class="fas fa-list"></i> Voir toutes mes réservations
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

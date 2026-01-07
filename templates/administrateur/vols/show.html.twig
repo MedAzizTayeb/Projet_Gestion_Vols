@@ -1,0 +1,235 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Vol - AeroManager{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="mb-4">
+            <a href="{{ path('app_admin_vols_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="row">
+            <!-- Informations principales -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plane"></i> Informations Vol</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <h2 class="text-primary mb-2">{{ vol.numVol }}</h2>
+                            <span class="badge bg-primary">{{ vol.statut|default('planifié') }}</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="text-center flex-fill">
+                                    <div class="h3 text-primary mb-0">{{ vol.depart.codeIATA }}</div>
+                                    <small class="text-muted">{{ vol.depart.ville }}</small>
+                                </div>
+                                <div class="px-3">
+                                    <i class="fas fa-arrow-right fa-2x text-muted"></i>
+                                </div>
+                                <div class="text-center flex-fill">
+                                    <div class="h3 text-success mb-0">{{ vol.arrivee.codeIATA }}</div>
+                                    <small class="text-muted">{{ vol.arrivee.ville }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Départ</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-plane-departure text-primary me-2"></i>
+                                <div>
+                                    <strong>{{ vol.dateDepart|date('d/m/Y') }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ vol.dateDepart|date('H:i') }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Arrivée</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-plane-arrival text-success me-2"></i>
+                                <div>
+                                    <strong>{{ vol.dateArrive|date('d/m/Y') }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ vol.dateArrive|date('H:i') }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Porte d'embarquement</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-door-open text-warning me-2"></i>
+                                <strong>{{ vol.port }}</strong>
+                            </div>
+                        </div>
+
+                        {% if vol.escale %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Escale(s)</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-exchange-alt text-info me-2"></i>
+                                    <strong>{{ vol.escale }}</strong>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Places disponibles</label>
+                            <div>
+                                <span class="badge bg-info" style="font-size: 1.2rem;">{{ vol.placesDisponibles }}</span>
+                            </div>
+                        </div>
+
+                        {% if vol.avion %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Avion</label>
+                                <div>
+                                    <strong>{{ vol.avion.modele }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ vol.avion.immatriculation }}</small>
+                                    <br>
+                                    <small class="text-muted">Capacité: {{ vol.avion.capacite }} passagers</small>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if vol.creePar %}
+                            <div class="mb-3">
+                                <label class="text-muted small">Créé par</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-shield text-secondary me-2"></i>
+                                    <strong>{{ vol.creePar.nomComplet }}</strong>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_admin_vols_edit', {'id': vol.id}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <form method="post" action="{{ path('app_admin_vols_delete', {'id': vol.id}) }}"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce vol ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ vol.id) }}">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Réservations -->
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clipboard-list"></i>
+                            Réservations
+                            <span class="badge bg-light text-success">{{ vol.reservations|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if vol.reservations is empty %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3" style="opacity: 0.3;"></i>
+                                <p class="text-muted">Aucune réservation pour ce vol</p>
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Référence</th>
+                                        <th>Client</th>
+                                        <th>Date Réservation</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for reservation in vol.reservations %}
+                                        <tr>
+                                            <td><strong>{{ reservation.reference }}</strong></td>
+                                            <td>
+                                                {% if reservation.client and reservation.client.user %}
+                                                    {{ reservation.client.user.nomComplet }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ reservation.dateRes|date('d/m/Y H:i') }}</td>
+                                            <td>
+                                                {% if reservation.satut == 'confirmé' %}
+                                                    <span class="badge bg-success">Confirmé</span>
+                                                {% elseif reservation.satut == 'en attente' %}
+                                                    <span class="badge bg-warning">En attente</span>
+                                                {% elseif reservation.satut == 'annulé' %}
+                                                    <span class="badge bg-danger">Annulé</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ reservation.satut }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques du Vol</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-primary mb-0">{{ vol.reservations|length }}</h3>
+                                    <small class="text-muted">Réservations</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-success mb-0">
+                                        {{ vol.reservations|filter(r => r.satut == 'confirmé')|length }}
+                                    </h3>
+                                    <small class="text-muted">Confirmées</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-info mb-0">{{ vol.placesDisponibles }}</h3>
+                                    <small class="text-muted">Places libres</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    {% if vol.avion %}
+                                        {% set taux = ((vol.avion.capacite - vol.placesDisponibles) / vol.avion.capacite * 100)|round %}
+                                        <h3 class="text-warning mb-0">{{ taux }}%</h3>
+                                    {% else %}
+                                        <h3 class="text-warning mb-0">-</h3>
+                                    {% endif %}
+                                    <small class="text-muted">Taux remplissage</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
