@@ -172,7 +172,7 @@
                     <div class="info-row">
                         <span class="info-label">Date de Transaction</span>
                         <span class="info-value">
-                            {{ paiement.reservation.dateReservation|date('d/m/Y à H:i:s') }}
+                            {{ paiement.reservation.dateRes|date('d/m/Y à H:i:s') }}
                         </span>
                     </div>
                 </div>
@@ -209,7 +209,7 @@
                     <div class="info-row">
                         <span class="info-label">Date de Réservation</span>
                         <span class="info-value">
-                            {{ paiement.reservation.dateReservation|date('d/m/Y à H:i') }}
+                            {{ paiement.reservation.dateRes|date('d/m/Y à H:i') }}
                         </span>
                     </div>
 
@@ -254,7 +254,7 @@
                             <strong>{{ paiement.reservation.vol.arrivee.ville }}</strong>
                             ({{ paiement.reservation.vol.arrivee.codeIATA }})
                             <div class="small text-muted">
-                                {{ paiement.reservation.vol.dateArrivee|date('d/m/Y à H:i') }}
+                                {{ paiement.reservation.vol.dateArrive|date('d/m/Y à H:i') }}
                             </div>
                         </span>
                         </div>
@@ -352,7 +352,7 @@
                     <div class="timeline">
                         <div class="timeline-item">
                             <div class="text-muted small">
-                                {{ paiement.reservation.dateReservation|date('d/m/Y H:i') }}
+                                {{ paiement.reservation.dateRes|date('d/m/Y H:i') }}
                             </div>
                             <strong>Paiement effectué</strong>
                             <div class="small text-muted">
@@ -363,7 +363,7 @@
                         {% if paiement.statut == 'confirmé' %}
                             <div class="timeline-item">
                                 <div class="text-muted small">
-                                    {{ paiement.reservation.dateReservation|date('d/m/Y H:i') }}
+                                    {{ paiement.reservation.dateRes|date('d/m/Y H:i') }}
                                 </div>
                                 <strong class="text-success">Paiement confirmé</strong>
                                 <div class="small text-muted">
@@ -375,7 +375,7 @@
                         {% if paiement.reservation.tickets|length > 0 %}
                             <div class="timeline-item">
                                 <div class="text-muted small">
-                                    {{ paiement.reservation.dateReservation|date('d/m/Y H:i') }}
+                                    {{ paiement.reservation.dateRes|date('d/m/Y H:i') }}
                                 </div>
                                 <strong class="text-info">Billets générés</strong>
                                 <div class="small text-muted">

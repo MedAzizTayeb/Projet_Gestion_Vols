@@ -245,9 +245,9 @@
                                         <strong class="font-monospace">#{{ paiement.id }}</strong>
                                     </td>
                                     <td>
-                                            <span class="font-monospace">
-                                                {{ paiement.reservation.reference|default('N/A') }}
-                                            </span>
+                                        <span class="font-monospace">
+                                            {{ paiement.reservation.reference|default('N/A') }}
+                                        </span>
                                     </td>
                                     <td>
                                         {% if paiement.reservation.client %}
@@ -277,38 +277,38 @@
                                         <strong class="text-success">{{ paiement.montant|number_format(2, ',', ' ') }} €</strong>
                                     </td>
                                     <td>
-                                            <span class="badge bg-light text-dark">
-                                                {% if paiement.method == 'Carte Bancaire' %}
-                                                    <i class="fas fa-credit-card"></i>
-                                                {% elseif paiement.method == 'PayPal' %}
-                                                    <i class="fab fa-paypal"></i>
-                                                {% elseif paiement.method == 'Virement Bancaire' %}
-                                                    <i class="fas fa-university"></i>
-                                                {% else %}
-                                                    <i class="fas fa-money-bill-wave"></i>
-                                                {% endif %}
-                                                {{ paiement.method }}
-                                            </span>
+                                        <span class="badge bg-light text-dark">
+                                            {% if paiement.method == 'Carte Bancaire' %}
+                                                <i class="fas fa-credit-card"></i>
+                                            {% elseif paiement.method == 'PayPal' %}
+                                                <i class="fab fa-paypal"></i>
+                                            {% elseif paiement.method == 'Virement Bancaire' %}
+                                                <i class="fas fa-university"></i>
+                                            {% else %}
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            {% endif %}
+                                            {{ paiement.method }}
+                                        </span>
                                     </td>
                                     <td>
                                         {% if paiement.statut == 'confirmé' %}
                                             <span class="badge badge-confirmed px-3 py-2">
-                                                    <i class="fas fa-check"></i> Confirmé
-                                                </span>
+                                                <i class="fas fa-check"></i> Confirmé
+                                            </span>
                                         {% elseif paiement.statut == 'remboursé' %}
                                             <span class="badge badge-refunded px-3 py-2">
-                                                    <i class="fas fa-undo"></i> Remboursé
-                                                </span>
+                                                <i class="fas fa-undo"></i> Remboursé
+                                            </span>
                                         {% else %}
                                             <span class="badge badge-pending px-3 py-2">
-                                                    <i class="fas fa-clock"></i> {{ paiement.statut|capitalize }}
-                                                </span>
+                                                <i class="fas fa-clock"></i> {{ paiement.statut|capitalize }}
+                                            </span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         <div class="small">
-                                            <div>{{ paiement.reservation.dateReservation|date('d/m/Y') }}</div>
-                                            <div class="text-muted">{{ paiement.reservation.dateReservation|date('H:i') }}</div>
+                                            <div>{{ paiement.reservation.dateRes|date('d/m/Y') }}</div>
+                                            <div class="text-muted">{{ paiement.reservation.dateRes|date('H:i') }}</div>
                                         </div>
                                     </td>
                                     <td class="text-center">
@@ -357,7 +357,11 @@
                                                         <span class="text-danger">{{ paiement.montant|number_format(2, ',', ' ') }} €</span><br>
                                                         <strong>Réservation :</strong> {{ paiement.reservation.reference }}<br>
                                                         <strong>Client :</strong>
-                                                        {{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}
+                                                        {% if paiement.reservation.client and paiement.reservation.client.user %}
+                                                            {{ paiement.reservation.client.user.nom }} {{ paiement.reservation.client.user.prenom }}
+                                                        {% else %}
+                                                            N/A
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>

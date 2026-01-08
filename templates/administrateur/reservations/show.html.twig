@@ -1,0 +1,628 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réservation {{ reservation.reference }} - Administration{% endblock %}
+
+{% block body %}
+    <style>
+        .detail-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .info-value {
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .status-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.55rem;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+        }
+
+        .flight-route {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .flight-city {
+            text-align: center;
+        }
+
+        .flight-arrow {
+            font-size: 2rem;
+            margin: 0 2rem;
+        }
+    </style>
+
+    <div class="detail-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-ticket-alt"></i> Réservation {{ reservation.reference }}</h1>
+                    <p class="mb-0 opacity-75">Détails complets de la réservation</p>
+                </div>
+                <a href="{{ path('app_admin_reservations_index') }}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row">
+            {# Main Content #}
+            <div class="col-lg-8">
+                {# Flight Route Visual #}
+                {% if reservation.vol %}
+                    <div class="flight-route">
+                        <div class="flight-city">
+                            <div class="h2 mb-0">{{ reservation.vol.depart.codeIATA }}</div>
+                            <div class="opacity-75">{{ reservation.vol.depart.ville }}</div>
+                            <div class="small opacity-50">{{ reservation.vol.depart.pays }}</div>
+                            <div class="mt-3">
+                                <i class="fas fa-clock"></i>
+                                {{ reservation.vol.dateDepart|date('H:i') }}
+                            </div>
+                        </div>
+
+                        <div class="flight-arrow">
+                            <i class="fas fa-plane"></i>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+
+                        <div class="flight-city">
+                            <div class="h2 mb-0">{{ reservation.vol.arrivee.codeIATA }}</div>
+                            <div class="opacity-75">{{ reservation.vol.arrivee.ville }}</div>
+                            <div class="small opacity-50">{{ reservation.vol.arrivee.pays }}</div>
+                            <div class="mt-3">
+                                <i class="fas fa-clock"></i>
+                                {{ reservation.vol.dateArrive|date('H:i') }}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# Reservation Details #}
+                <div class="detail-card">
+                    <h4 class="mb-4">
+                        <i class="fas fa-info-circle text-primary"></i> Informations de la Réservation
+                    </h4>
+
+                    <div class="info-row">
+                        <span class="info-label">Référence</span>
+                        <span class="info-value">
+                            <span class="badge bg-primary font-monospace">{{ reservation.reference }}</span>
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Statut</span>
+                        <span class="info-value">
+                            {% if reservation.satut == 'confirmé' %}
+                                <span class="status-badge bg-success text-white">
+                                    <i class="fas fa-check-circle"></i> Confirmé
+                                </span>
+                            {% elseif reservation.satut == 'annulé' %}
+                                <span class="status-badge bg-danger text-white">
+                                    <i class="fas fa-times-circle"></i> Annulé
+                                </span>
+                            {% else %}
+                                <span class="status-badge bg-warning text-dark">
+                                    <i class="fas fa-clock"></i> {{ reservation.satut|capitalize }}
+                                </span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Date de Réservation</span>
+                        <span class="info-value">
+                            {{ reservation.dateRes|date('d/m/Y à H:i:s') }}
+                        </span>
+                    </div>
+
+                    {% if reservation.vol %}
+                        <div class="info-row">
+                            <span class="info-label">Numéro de Vol</span>
+                            <span class="info-value">
+                                <strong>{{ reservation.vol.numVol }}</strong>
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Date de Départ</span>
+                            <span class="info-value">
+                                {{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Date d'Arrivée</span>
+                            <span class="info-value">
+                                {{ reservation.vol.dateArrive|date('d/m/Y à H:i') }}
+                            </span>
+                        </div>
+
+                        {% if reservation.vol.avion %}
+                            <div class="info-row">
+                                <span class="info-label">Avion</span>
+                                <span class="info-value">
+                                    {{ reservation.vol.avion.modele }}
+                                    <div class="small text-muted">{{ reservation.vol.avion.immatriculation }}</div>
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        <div class="info-row">
+                            <span class="info-label">Porte d'Embarquement</span>
+                            <span class="info-value">
+                                <span class="badge bg-info">{{ reservation.vol.port }}</span>
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Client Information #}
+                {% if reservation.client %}
+                    <div class="detail-card">
+                        <h4 class="mb-4">
+                            <i class="fas fa-user text-success"></i> Informations Client
+                        </h4>
+
+                        {% if reservation.client.user %}
+                            {% set user = reservation.client.user %}
+                            <div class="info-row">
+                                <span class="info-label">Nom Complet</span>
+                                <span class="info-value">
+                                    <strong>{{ user.nom }} {{ user.prenom }}</strong>
+                                </span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">Email</span>
+                                <span class="info-value">
+                                    <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        {% if reservation.client.telephone %}
+                            <div class="info-row">
+                                <span class="info-label">Téléphone</span>
+                                <span class="info-value">
+                                    <a href="tel:{{ reservation.client.telephone }}">
+                                        {{ reservation.client.telephone }}
+                                    </a>
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        <div class="info-row">
+                            <span class="info-label">Date d'Inscription</span>
+                            <span class="info-value">
+                                {{ reservation.client.dateInscription|date('d/m/Y') }}
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Actions</span>
+                            <span class="info-value">
+                                <a href="{{ path('app_admin_clients_show', {'id': reservation.client.id}) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Voir le profil complet
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# Passagers #}
+                {% if reservation.passagers|length > 0 %}
+                    <div class="detail-card">
+                        <h4 class="mb-4">
+                            <i class="fas fa-users text-info"></i> Passagers ({{ reservation.passagers|length }})
+                        </h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Nom Complet</th>
+                                    <th>Passeport</th>
+                                    <th>Nationalité</th>
+                                    <th>Date de Naissance</th>
+                                    <th>Bagages</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for passager in reservation.passagers %}
+                                    <tr>
+                                        <td><strong>{{ passager.nom }} {{ passager.prenom }}</strong></td>
+                                        <td class="font-monospace">{{ passager.numPassport }}</td>
+                                        <td>{{ passager.nationalite }}</td>
+                                        <td>{{ passager.dateNaissance|date('d/m/Y') }}</td>
+                                        <td>{{ passager.poidsBagages }} kg</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="detail-card">
+                        <div class="alert alert-warning mb-0">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Aucun passager n'a été ajouté à cette réservation
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# Tickets #}
+                {% if reservation.tickets|length > 0 %}
+                    <div class="detail-card">
+                        <h4 class="mb-4">
+                            <i class="fas fa-ticket-alt text-warning"></i> Billets ({{ reservation.tickets|length }})
+                        </h4>
+
+                        <div class="row">
+                            {% for ticket in reservation.tickets %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <strong>Billet #{{ loop.index }}</strong><br>
+                                                    <small class="text-muted font-monospace">{{ ticket.numero }}</small>
+                                                </div>
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Généré
+                                                </span>
+                                            </div>
+                                            <div class="small text-muted">
+                                                Créé le {{ ticket.dateCreation|date('d/m/Y') }}
+                                            </div>
+                                            {% if ticket.passager %}
+                                                <div class="mt-2">
+                                                    <i class="fas fa-user"></i>
+                                                    {{ ticket.passager.nomComplet }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# Paiement #}
+                {% if reservation.paiement %}
+                    <div class="detail-card">
+                        <h4 class="mb-4">
+                            <i class="fas fa-credit-card text-success"></i> Paiement
+                        </h4>
+
+                        <div class="info-row">
+                            <span class="info-label">Montant</span>
+                            <span class="info-value">
+                                <strong class="text-success h4 mb-0">
+                                    {{ reservation.paiement.montant|number_format(2, ',', ' ') }} €
+                                </strong>
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Méthode</span>
+                            <span class="info-value">
+                                {% if reservation.paiement.method == 'Carte Bancaire' %}
+                                    <i class="fas fa-credit-card text-primary"></i>
+                                {% elseif reservation.paiement.method == 'PayPal' %}
+                                    <i class="fab fa-paypal text-primary"></i>
+                                {% elseif reservation.paiement.method == 'Virement Bancaire' %}
+                                    <i class="fas fa-university text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-money-bill-wave text-success"></i>
+                                {% endif %}
+                                {{ reservation.paiement.method }}
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Statut du Paiement</span>
+                            <span class="info-value">
+                                {% if reservation.paiement.statut == 'confirmé' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> Confirmé
+                                    </span>
+                                {% elseif reservation.paiement.statut == 'remboursé' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-undo"></i> Remboursé
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">
+                                        {{ reservation.paiement.statut|capitalize }}
+                                    </span>
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Actions</span>
+                            <span class="info-value">
+                                <a href="{{ path('app_paiement_show', {'id': reservation.paiement.id}) }}"
+                                   class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-eye"></i> Voir les détails du paiement
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="detail-card">
+                        <div class="alert alert-warning mb-0">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Paiement en attente</strong><br>
+                            Cette réservation n'a pas encore été payée.
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Sidebar #}
+            <div class="col-lg-4">
+                {# Actions #}
+                <div class="detail-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-cogs"></i> Actions
+                    </h5>
+
+                    {% if reservation.satut == 'en attente' %}
+                        <form method="post" action="{{ path('app_admin_reservations_valider', {'id': reservation.id}) }}" class="mb-2">
+                            <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ reservation.id) }}">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-check"></i> Valider la réservation
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {% if reservation.satut != 'annulé' %}
+                        <button type="button"
+                                class="btn btn-danger w-100 mb-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#cancelModal">
+                            <i class="fas fa-times"></i> Annuler la réservation
+                        </button>
+                    {% endif %}
+
+                    <button onclick="window.print()" class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="fas fa-print"></i> Imprimer
+                    </button>
+
+                    <a href="{{ path('app_admin_reservations_index') }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-list"></i> Liste des réservations
+                    </a>
+                </div>
+
+                {# Timeline #}
+                <div class="detail-card">
+                    <h5 class="mb-4">
+                        <i class="fas fa-history"></i> Historique
+                    </h5>
+
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="text-muted small">
+                                {{ reservation.dateRes|date('d/m/Y H:i') }}
+                            </div>
+                            <strong>Réservation créée</strong>
+                            <div class="small text-muted">
+                                Référence: {{ reservation.reference }}
+                            </div>
+                        </div>
+
+                        {% if reservation.paiement %}
+                            <div class="timeline-item">
+                                <div class="text-muted small">
+                                    {{ reservation.dateRes|date('d/m/Y H:i') }}
+                                </div>
+                                <strong class="text-success">Paiement effectué</strong>
+                                <div class="small text-muted">
+                                    {{ reservation.paiement.montant|number_format(2, ',', ' ') }} €
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if reservation.satut == 'confirmé' %}
+                            <div class="timeline-item">
+                                <div class="text-muted small">
+                                    {{ reservation.dateRes|date('d/m/Y H:i') }}
+                                </div>
+                                <strong class="text-success">Réservation confirmée</strong>
+                            </div>
+                        {% endif %}
+
+                        {% if reservation.tickets|length > 0 %}
+                            <div class="timeline-item">
+                                <div class="text-muted small">
+                                    {{ reservation.tickets[0].dateCreation|date('d/m/Y H:i') }}
+                                </div>
+                                <strong class="text-info">Billets générés</strong>
+                                <div class="small text-muted">
+                                    {{ reservation.tickets|length }} billet(s)
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if reservation.satut == 'annulé' %}
+                            <div class="timeline-item">
+                                <div class="text-muted small">Date d'annulation</div>
+                                <strong class="text-danger">Réservation annulée</strong>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Summary #}
+                <div class="detail-card bg-light">
+                    <h5 class="mb-3">
+                        <i class="fas fa-chart-pie"></i> Résumé
+                    </h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Passagers</span>
+                        <strong>{{ reservation.passagers|length }}</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Billets générés</span>
+                        <strong>{{ reservation.tickets|length }}</strong>
+                    </div>
+
+                    {% if reservation.paiement %}
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <strong>Montant Total</strong>
+                            <strong class="text-success">
+                                {{ reservation.paiement.montant|number_format(2, ',', ' ') }} €
+                            </strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Cancel Modal #}
+    {% if reservation.satut != 'annulé' %}
+        <div class="modal fade" id="cancelModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle"></i> Confirmer l'Annulation
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
+                        <div class="alert alert-warning">
+                            <strong>Cette action va :</strong>
+                            <ul class="mb-0">
+                                <li>Marquer la réservation comme annulée</li>
+                                <li>Remettre les places disponibles dans le vol</li>
+                                {% if reservation.paiement and reservation.paiement.statut == 'confirmé' %}
+                                    <li>Nécessiter un remboursement manuel du paiement</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <strong>Réservation :</strong> {{ reservation.reference }}<br>
+                                <strong>Client :</strong>
+                                {% if reservation.client and reservation.client.user %}
+                                    {{ reservation.client.user.nomComplet }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Non, garder la réservation
+                        </button>
+                        <form method="post" action="{{ path('app_admin_reservations_annuler', {'id': reservation.id}) }}" style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('annuler' ~ reservation.id) }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Oui, annuler
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+{% endblock %}
