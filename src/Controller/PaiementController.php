@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Paiement;
 use App\Entity\Ticket;
 use App\Repository\ReservationRepository;
+use App\Repository\PaiementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,12 +44,25 @@ class PaiementController extends AbstractController
             return $this->redirectToRoute('app_reservation_show', ['id' => $reservation->getId()]);
         }
 
+        // Calculer le montant basé sur le nombre de passagers
+        $nbPassagers = $request->getSession()->get('reservation_nb_passagers_' . $reservation->getId(), 1);
+        $prixParBillet = 150.00; // Prix par défaut - peut être configuré
+        $montantTotal = $prixParBillet * $nbPassagers;
+
         if ($request->isMethod('POST')) {
             try {
+                $method = $request->request->get('method', 'Carte Bancaire');
+
+                // Validation de la méthode de paiement
+                $methodesValides = ['Carte Bancaire', 'PayPal', 'Virement Bancaire', 'Paiement à l\'Aéroport'];
+                if (!in_array($method, $methodesValides)) {
+                    throw new \Exception('Méthode de paiement invalide');
+                }
+
                 // Créer le paiement
                 $paiement = new Paiement();
-                $paiement->setMontant($request->request->get('montant', '100.00'));
-                $paiement->setMethod($request->request->get('method', 'Carte Bancaire'));
+                $paiement->setMontant(number_format($montantTotal, 2, '.', ''));
+                $paiement->setMethod($method);
                 $paiement->setStatut('confirmé');
                 $paiement->setReservation($reservation);
 
@@ -58,8 +72,6 @@ class PaiementController extends AbstractController
                 $reservation->setSatut('confirmé');
 
                 // Générer les tickets automatiquement
-                $nbPassagers = $request->getSession()->get('reservation_nb_passagers_' . $reservation->getId(), 1);
-
                 for ($i = 1; $i <= $nbPassagers; $i++) {
                     $ticket = new Ticket();
                     $ticket->setIdTicket(random_int(100000, 999999));
@@ -74,6 +86,9 @@ class PaiementController extends AbstractController
 
                 $entityManager->flush();
 
+                // Nettoyer la session
+                $request->getSession()->remove('reservation_nb_passagers_' . $reservation->getId());
+
                 $this->addFlash('success', 'Paiement confirmé ! Vos billets ont été générés.');
 
                 return $this->redirectToRoute('app_paiement_success', ['id' => $paiement->getId()]);
@@ -85,6 +100,9 @@ class PaiementController extends AbstractController
 
         return $this->render('paiement/new.html.twig', [
             'reservation' => $reservation,
+            'nbPassagers' => $nbPassagers,
+            'prixParBillet' => $prixParBillet,
+            'montantTotal' => $montantTotal,
         ]);
     }
 
@@ -106,11 +124,11 @@ class PaiementController extends AbstractController
 
     #[Route('/admin', name: 'app_paiement_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(PaiementRepository $paiementRepository): Response
     {
-        $paiements = $entityManager->getRepository(Paiement::class)->findAll();
+        $paiements = $paiementRepository->findBy([], ['id' => 'DESC']);
 
-        return $this->render('paiement/index.html.twig', [
+        return $this->render('administrateur/paiement/index.html.twig', [
             'paiements' => $paiements,
         ]);
     }
@@ -119,8 +137,40 @@ class PaiementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function show(Paiement $paiement): Response
     {
-        return $this->render('paiement/show.html.twig', [
+        return $this->render('administrateur/paiement/show.html.twig', [
             'paiement' => $paiement,
         ]);
+    }
+
+    #[Route('/admin/{id}/rembourser', name: 'app_paiement_refund', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function refund(
+        Paiement $paiement,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($this->isCsrfTokenValid('refund' . $paiement->getId(), $request->request->get('_token'))) {
+            try {
+                // Marquer le paiement comme remboursé
+                $paiement->setStatut('remboursé');
+
+                // Annuler la réservation associée
+                $reservation = $paiement->getReservation();
+                $reservation->setSatut('annulé');
+
+                // Remettre les places disponibles
+                $vol = $reservation->getVol();
+                $nbPassagers = $request->getSession()->get('reservation_nb_passagers_' . $reservation->getId(), 1);
+                $vol->setPlacesDisponibles($vol->getPlacesDisponibles() + $nbPassagers);
+
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Paiement remboursé avec succès');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur lors du remboursement : ' . $e->getMessage());
+            }
+        }
+
+        return $this->redirectToRoute('app_paiement_index');
     }
 }

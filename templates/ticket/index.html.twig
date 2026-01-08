@@ -1,41 +1,343 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ticket index{% endblock %}
+{% block title %}Mes Billets - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Ticket index</h1>
+    <style>
+        .tickets-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>IdTicket</th>
-                <th>Numero</th>
-                <th>DateCreation</th>
-                <th>PdfPath</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for ticket in tickets %}
-            <tr>
-                <td>{{ ticket.id }}</td>
-                <td>{{ ticket.idTicket }}</td>
-                <td>{{ ticket.numero }}</td>
-                <td>{{ ticket.dateCreation ? ticket.dateCreation|date('Y-m-d') : '' }}</td>
-                <td>{{ ticket.pdfPath }}</td>
-                <td>
-                    <a href="{{ path('app_ticket_show', {'id': ticket.id}) }}">show</a>
-                    <a href="{{ path('app_ticket_edit', {'id': ticket.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
+        .ticket-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+
+        .ticket-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .ticket-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .ticket-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .ticket-body {
+            padding: 2rem;
+        }
+
+        .flight-route {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1.5rem 0;
+        }
+
+        .airport {
+            text-align: center;
+            flex: 1;
+        }
+
+        .airport-code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .airport-city {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .flight-arrow {
+            flex: 1;
+            text-align: center;
+            color: #28a745;
+            font-size: 2rem;
+        }
+
+        .ticket-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            color: #e9ecef;
+            margin-bottom: 1.5rem;
+        }
+
+        .barcode-placeholder {
+            background: repeating-linear-gradient(
+                90deg,
+                #000,
+                #000 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            height: 60px;
+            margin: 1rem 0;
+        }
+    </style>
+
+    <div class="tickets-header">
+        <div class="container text-center">
+            <h1><i class="fas fa-ticket-alt"></i> Mes Billets</h1>
+            <p class="mb-0 opacity-75">Consultez et téléchargez vos billets d'avion</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
         {% endfor %}
-        </tbody>
-    </table>
 
-    <a href="{{ path('app_ticket_new') }}">Create new</a>
+        {% if tickets|length > 0 %}
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-ticket-alt fa-2x text-primary mb-2"></i>
+                            <h4 class="mb-0">{{ tickets|length }}</h4>
+                            <small class="text-muted">Billets Total</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h4 class="mb-0">
+                                {% set validTickets = 0 %}
+                                {% for ticket in tickets %}
+                                    {% if ticket.reservation.satut == 'confirmé' %}
+                                        {% set validTickets = validTickets + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ validTickets }}
+                            </h4>
+                            <small class="text-muted">Billets Valides</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-plane-departure fa-2x text-info mb-2"></i>
+                            <h4 class="mb-0">
+                                {% set upcomingFlights = 0 %}
+                                {% for ticket in tickets %}
+                                    {% if ticket.vol and ticket.vol.dateDepart > date() %}
+                                        {% set upcomingFlights = upcomingFlights + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ upcomingFlights }}
+                            </h4>
+                            <small class="text-muted">Vols à Venir</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                {% for ticket in tickets %}
+                    <div class="col-lg-6">
+                        <div class="ticket-card">
+                            <div class="ticket-header">
+                                {% if ticket.reservation.satut == 'confirmé' %}
+                                    <span class="ticket-status bg-success text-white">
+                                        <i class="fas fa-check"></i> Valide
+                                    </span>
+                                {% elseif ticket.reservation.satut == 'annulé' %}
+                                    <span class="ticket-status bg-danger text-white">
+                                        <i class="fas fa-times"></i> Annulé
+                                    </span>
+                                {% else %}
+                                    <span class="ticket-status bg-warning text-dark">
+                                        <i class="fas fa-clock"></i> En Attente
+                                    </span>
+                                {% endif %}
+
+                                <div class="text-center">
+                                    <small class="opacity-75 d-block mb-2">BILLET ÉLECTRONIQUE</small>
+                                    <div class="ticket-number">{{ ticket.numero }}</div>
+                                </div>
+                            </div>
+
+                            <div class="ticket-body">
+                                {% if ticket.vol %}
+                                    <div class="flight-route">
+                                        <div class="airport">
+                                            <div class="airport-code">
+                                                {{ ticket.vol.depart.codeIATA|default(ticket.vol.depart.ville|slice(0, 3)|upper) }}
+                                            </div>
+                                            <div class="airport-city">{{ ticket.vol.depart.ville }}</div>
+                                        </div>
+                                        <div class="flight-arrow">
+                                            <i class="fas fa-plane"></i>
+                                        </div>
+                                        <div class="airport">
+                                            <div class="airport-code">
+                                                {{ ticket.vol.arrivee.codeIATA|default(ticket.vol.arrivee.ville|slice(0, 3)|upper) }}
+                                            </div>
+                                            <div class="airport-city">{{ ticket.vol.arrivee.ville }}</div>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6">
+                                            <div class="text-muted small">Vol</div>
+                                            <strong>{{ ticket.vol.numVol }}</strong>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <div class="text-muted small">Date</div>
+                                            <strong>{{ ticket.vol.dateDepart|date('d/m/Y') }}</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-muted small">Départ</div>
+                                            <strong>{{ ticket.vol.dateDepart|date('H:i') }}</strong>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <div class="text-muted small">Arrivée</div>
+                                            <strong>{{ ticket.vol.dateArrivee|date('H:i') }}</strong>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Informations de vol non disponibles
+                                    </div>
+                                {% endif %}
+
+                                {% if ticket.passager %}
+                                    <div class="card bg-light mb-3">
+                                        <div class="card-body py-2">
+                                            <div class="text-muted small">Passager</div>
+                                            <strong>{{ ticket.passager.nom }} {{ ticket.passager.prenom }}</strong>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="barcode-placeholder"></div>
+
+                                <div class="d-grid gap-2">
+                                    <a href="{{ path('app_client_ticket_show', {'id': ticket.id}) }}"
+                                       class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> Voir les Détails
+                                    </a>
+                                    <a href="{{ path('app_client_ticket_download', {'id': ticket.id}) }}"
+                                       class="btn btn-outline-success">
+                                        <i class="fas fa-download"></i> Télécharger PDF
+                                    </a>
+                                </div>
+
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i>
+                                        Émis le {{ ticket.dateCreation|date('d/m/Y à H:i') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="card border-0 shadow-lg">
+                <div class="card-body">
+                    <div class="empty-state">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>Aucun billet trouvé</h3>
+                        <p class="text-muted mb-4">
+                            Vous n'avez pas encore de billets.<br>
+                            Réservez un vol pour obtenir vos billets électroniques.
+                        </p>
+                        <a href="{{ path('app_vol_index') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search"></i> Rechercher un Vol
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations Importantes</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li class="mb-2">
+                        <strong>Présentez-vous à l'aéroport au moins 2 heures avant le départ</strong>
+                    </li>
+                    <li class="mb-2">
+                        Munissez-vous de votre billet électronique (imprimé ou sur mobile) et d'une pièce d'identité valide
+                    </li>
+                    <li class="mb-2">
+                        Les billets sont nominatifs et non transférables
+                    </li>
+                    <li class="mb-2">
+                        En cas de problème, contactez notre service client
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
 {% endblock %}

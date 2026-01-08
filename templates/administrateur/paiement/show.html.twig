@@ -1,0 +1,533 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Paiement #{{ paiement.id }} - Administration{% endblock %}
+
+{% block body %}
+    <style>
+        .detail-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .info-value {
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .status-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.55rem;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+        }
+
+        .amount-display {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    <div class="detail-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-receipt"></i> Paiement #{{ paiement.id }}</h1>
+                    <p class="mb-0 opacity-75">Détails complets du paiement</p>
+                </div>
+                <a href="{{ path('app_paiement_index') }}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row">
+            {# Main Information #}
+            <div class="col-lg-8">
+                {# Payment Details #}
+                <div class="detail-card">
+                    <h4 class="mb-4">
+                        <i class="fas fa-info-circle text-primary"></i> Informations du Paiement
+                    </h4>
+
+                    <div class="text-center mb-4 p-4 bg-light rounded">
+                        <div class="text-muted mb-2">Montant Total</div>
+                        <div class="amount-display">{{ paiement.montant|number_format(2, ',', ' ') }} €</div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">ID Paiement</span>
+                        <span class="info-value">
+                            <span class="badge bg-secondary font-monospace">#{{ paiement.id }}</span>
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Méthode de Paiement</span>
+                        <span class="info-value">
+                            {% if paiement.method == 'Carte Bancaire' %}
+                                <i class="fas fa-credit-card text-primary"></i>
+                            {% elseif paiement.method == 'PayPal' %}
+                                <i class="fab fa-paypal text-primary"></i>
+                            {% elseif paiement.method == 'Virement Bancaire' %}
+                                <i class="fas fa-university text-primary"></i>
+                            {% else %}
+                                <i class="fas fa-money-bill-wave text-success"></i>
+                            {% endif %}
+                            {{ paiement.method }}
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Statut</span>
+                        <span class="info-value">
+                            {% if paiement.statut == 'confirmé' %}
+                                <span class="status-badge bg-success text-white">
+                                    <i class="fas fa-check-circle"></i> Confirmé
+                                </span>
+                            {% elseif paiement.statut == 'remboursé' %}
+                                <span class="status-badge bg-danger text-white">
+                                    <i class="fas fa-undo"></i> Remboursé
+                                </span>
+                            {% else %}
+                                <span class="status-badge bg-warning text-dark">
+                                    <i class="fas fa-clock"></i> {{ paiement.statut|capitalize }}
+                                </span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Date de Transaction</span>
+                        <span class="info-value">
+                            {{ paiement.reservation.dateReservation|date('d/m/Y à H:i:s') }}
+                        </span>
+                    </div>
+                </div>
+
+                {# Reservation Details #}
+                <div class="detail-card">
+                    <h4 class="mb-4">
+                        <i class="fas fa-ticket-alt text-info"></i> Réservation Associée
+                    </h4>
+
+                    <div class="info-row">
+                        <span class="info-label">Référence</span>
+                        <span class="info-value">
+                            <a href="{{ path('app_reservation_show', {'id': paiement.reservation.id}) }}"
+                               class="badge bg-primary text-decoration-none">
+                                {{ paiement.reservation.reference }}
+                            </a>
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Statut Réservation</span>
+                        <span class="info-value">
+                            {% if paiement.reservation.satut == 'confirmé' %}
+                                <span class="badge bg-success">Confirmé</span>
+                            {% elseif paiement.reservation.satut == 'annulé' %}
+                                <span class="badge bg-danger">Annulé</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">{{ paiement.reservation.satut|capitalize }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Date de Réservation</span>
+                        <span class="info-value">
+                            {{ paiement.reservation.dateReservation|date('d/m/Y à H:i') }}
+                        </span>
+                    </div>
+
+                    {% if paiement.reservation.tickets|length > 0 %}
+                        <div class="info-row">
+                            <span class="info-label">Billets Générés</span>
+                            <span class="info-value">
+                                <span class="badge bg-info">{{ paiement.reservation.tickets|length }} billet(s)</span>
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Flight Details #}
+                {% if paiement.reservation.vol %}
+                    <div class="detail-card">
+                        <h4 class="mb-4">
+                            <i class="fas fa-plane text-primary"></i> Détails du Vol
+                        </h4>
+
+                        <div class="info-row">
+                            <span class="info-label">Numéro de Vol</span>
+                            <span class="info-value">
+                            <strong>{{ paiement.reservation.vol.numVol }}</strong>
+                        </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Départ</span>
+                            <span class="info-value">
+                            <strong>{{ paiement.reservation.vol.depart.ville }}</strong>
+                            ({{ paiement.reservation.vol.depart.codeIATA }})
+                            <div class="small text-muted">
+                                {{ paiement.reservation.vol.dateDepart|date('d/m/Y à H:i') }}
+                            </div>
+                        </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Arrivée</span>
+                            <span class="info-value">
+                            <strong>{{ paiement.reservation.vol.arrivee.ville }}</strong>
+                            ({{ paiement.reservation.vol.arrivee.codeIATA }})
+                            <div class="small text-muted">
+                                {{ paiement.reservation.vol.dateArrivee|date('d/m/Y à H:i') }}
+                            </div>
+                        </span>
+                        </div>
+
+                        {% if paiement.reservation.vol.avion %}
+                            <div class="info-row">
+                                <span class="info-label">Avion</span>
+                                <span class="info-value">
+                                {{ paiement.reservation.vol.avion.modele }}
+                                <div class="small text-muted">{{ paiement.reservation.vol.avion.immatriculation }}</div>
+                            </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {# Client Information #}
+                {% if paiement.reservation.client %}
+                    <div class="detail-card">
+                        <h4 class="mb-4">
+                            <i class="fas fa-user text-success"></i> Informations Client
+                        </h4>
+
+                        <div class="info-row">
+                            <span class="info-label">Nom Complet</span>
+                            <span class="info-value">
+                            <strong>{{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}</strong>
+                        </span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">
+                            <a href="mailto:{{ paiement.reservation.client.email }}">
+                                {{ paiement.reservation.client.email }}
+                            </a>
+                        </span>
+                        </div>
+
+                        {% if paiement.reservation.client.telephone %}
+                            <div class="info-row">
+                                <span class="info-label">Téléphone</span>
+                                <span class="info-value">
+                            <a href="tel:{{ paiement.reservation.client.telephone }}">
+                                {{ paiement.reservation.client.telephone }}
+                            </a>
+                        </span>
+                            </div>
+                        {% endif %}
+
+                        {% if paiement.reservation.client.adresse %}
+                            <div class="info-row">
+                                <span class="info-label">Adresse</span>
+                                <span class="info-value">{{ paiement.reservation.client.adresse }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Sidebar #}
+            <div class="col-lg-4">
+                {# Actions #}
+                <div class="detail-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-cogs"></i> Actions
+                    </h5>
+
+                    {% if paiement.statut == 'confirmé' %}
+                        <button type="button"
+                                class="btn btn-danger w-100 mb-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#refundModal">
+                            <i class="fas fa-undo"></i> Rembourser ce paiement
+                        </button>
+                    {% elseif paiement.statut == 'remboursé' %}
+                        <div class="alert alert-danger mb-2">
+                            <i class="fas fa-info-circle"></i>
+                            Ce paiement a déjà été remboursé
+                        </div>
+                    {% endif %}
+
+                    <a href="{{ path('app_reservation_show', {'id': paiement.reservation.id}) }}"
+                       class="btn btn-info w-100 mb-2">
+                        <i class="fas fa-eye"></i> Voir la réservation
+                    </a>
+
+                    <button onclick="window.print()" class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="fas fa-print"></i> Imprimer
+                    </button>
+
+                    <a href="{{ path('app_paiement_index') }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-list"></i> Liste des paiements
+                    </a>
+                </div>
+
+                {# Timeline #}
+                <div class="detail-card">
+                    <h5 class="mb-4">
+                        <i class="fas fa-history"></i> Historique
+                    </h5>
+
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="text-muted small">
+                                {{ paiement.reservation.dateReservation|date('d/m/Y H:i') }}
+                            </div>
+                            <strong>Paiement effectué</strong>
+                            <div class="small text-muted">
+                                Montant: {{ paiement.montant|number_format(2, ',', ' ') }} €
+                            </div>
+                        </div>
+
+                        {% if paiement.statut == 'confirmé' %}
+                            <div class="timeline-item">
+                                <div class="text-muted small">
+                                    {{ paiement.reservation.dateReservation|date('d/m/Y H:i') }}
+                                </div>
+                                <strong class="text-success">Paiement confirmé</strong>
+                                <div class="small text-muted">
+                                    Méthode: {{ paiement.method }}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if paiement.reservation.tickets|length > 0 %}
+                            <div class="timeline-item">
+                                <div class="text-muted small">
+                                    {{ paiement.reservation.dateReservation|date('d/m/Y H:i') }}
+                                </div>
+                                <strong class="text-info">Billets générés</strong>
+                                <div class="small text-muted">
+                                    {{ paiement.reservation.tickets|length }} billet(s)
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if paiement.statut == 'remboursé' %}
+                            <div class="timeline-item">
+                                <div class="text-muted small">Date du remboursement</div>
+                                <strong class="text-danger">Paiement remboursé</strong>
+                                <div class="small text-muted">
+                                    Réservation annulée
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Payment Summary #}
+                <div class="detail-card bg-light">
+                    <h5 class="mb-3">
+                        <i class="fas fa-chart-pie"></i> Résumé
+                    </h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Montant brut</span>
+                        <strong>{{ paiement.montant|number_format(2, ',', ' ') }} €</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Taxes incluses</span>
+                        <strong class="text-success">✓</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Frais de service</span>
+                        <strong>0,00 €</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <strong>Total</strong>
+                        <strong class="text-success">{{ paiement.montant|number_format(2, ',', ' ') }} €</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Refund Modal #}
+    {% if paiement.statut == 'confirmé' %}
+        <div class="modal fade" id="refundModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle"></i> Confirmer le Remboursement
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-exclamation-circle"></i> Attention !
+                            </h5>
+                            <p class="mb-0">Cette action est irréversible. Le remboursement entraînera les actions suivantes :</p>
+                        </div>
+
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-danger"></i>
+                                Le paiement sera marqué comme <strong>remboursé</strong>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-danger"></i>
+                                La réservation sera <strong>annulée</strong>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-danger"></i>
+                                Les places seront <strong>remises disponibles</strong> dans le vol
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-danger"></i>
+                                Les billets seront <strong>invalidés</strong>
+                            </li>
+                        </ul>
+
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <strong>Détails du Remboursement</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Montant :</strong><br>
+                                        <span class="text-danger fs-4">{{ paiement.montant|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Client :</strong><br>
+                                        {{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}<br>
+                                        <small class="text-muted">{{ paiement.reservation.client.email }}</small>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Réservation :</strong><br>
+                                        {{ paiement.reservation.reference }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Vol :</strong><br>
+                                        {{ paiement.reservation.vol.numVol }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                        <form method="post" action="{{ path('app_paiement_refund', {'id': paiement.id}) }}" style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('refund' ~ paiement.id) }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-undo"></i> Confirmer le Remboursement
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+{% endblock %}

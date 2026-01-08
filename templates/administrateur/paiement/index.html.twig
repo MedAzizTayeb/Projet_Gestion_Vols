@@ -1,0 +1,414 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Paiements - Administration{% endblock %}
+
+{% block body %}
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .badge-confirmed {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .badge-refunded {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .badge-pending {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+    </style>
+
+    <div class="admin-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-money-check-alt"></i> Gestion des Paiements</h1>
+                    <p class="mb-0 opacity-75">Gérez et suivez tous les paiements</p>
+                </div>
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Tableau de bord
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# Statistics Cards #}
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">Total Paiements</div>
+                            <h3 class="mb-0">{{ paiements|length }}</h3>
+                        </div>
+                        <div class="stats-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">Confirmés</div>
+                            <h3 class="mb-0 text-success">
+                                {{ paiements|filter(p => p.statut == 'confirmé')|length }}
+                            </h3>
+                        </div>
+                        <div class="stats-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">Remboursés</div>
+                            <h3 class="mb-0 text-danger">
+                                {{ paiements|filter(p => p.statut == 'remboursé')|length }}
+                            </h3>
+                        </div>
+                        <div class="stats-icon bg-danger bg-opacity-10 text-danger">
+                            <i class="fas fa-undo"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">Revenus Total</div>
+                            <h3 class="mb-0 text-info">
+                                {% set total = 0 %}
+                                {% for p in paiements %}
+                                    {% if p.statut == 'confirmé' %}
+                                        {% set total = total + p.montant %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ total|number_format(2, ',', ' ') }} €
+                            </h3>
+                        </div>
+                        <div class="stats-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Filters #}
+        <div class="filter-card">
+            <h5 class="mb-3"><i class="fas fa-filter"></i> Filtres</h5>
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Statut</label>
+                    <select name="statut" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="confirmé">Confirmé</option>
+                        <option value="remboursé">Remboursé</option>
+                        <option value="en attente">En attente</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Méthode</label>
+                    <select name="method" class="form-select">
+                        <option value="">Toutes les méthodes</option>
+                        <option value="Carte Bancaire">Carte Bancaire</option>
+                        <option value="PayPal">PayPal</option>
+                        <option value="Virement Bancaire">Virement Bancaire</option>
+                        <option value="Paiement à l'Aéroport">Paiement à l'Aéroport</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Montant min</label>
+                    <input type="number" name="montant_min" class="form-control" placeholder="0">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Montant max</label>
+                    <input type="number" name="montant_max" class="form-control" placeholder="9999">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {# Payments Table #}
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Liste des Paiements</h5>
+                    <div class="input-group" style="max-width: 300px;">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Rechercher...">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if paiements|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="paymentsTable">
+                            <thead class="bg-light">
+                            <tr>
+                                <th class="px-4">ID</th>
+                                <th>Réservation</th>
+                                <th>Client</th>
+                                <th>Vol</th>
+                                <th>Montant</th>
+                                <th>Méthode</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for paiement in paiements %}
+                                <tr>
+                                    <td class="px-4">
+                                        <strong class="font-monospace">#{{ paiement.id }}</strong>
+                                    </td>
+                                    <td>
+                                            <span class="font-monospace">
+                                                {{ paiement.reservation.reference|default('N/A') }}
+                                            </span>
+                                    </td>
+                                    <td>
+                                        {% if paiement.reservation.client %}
+                                            <div>
+                                                <strong>{{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}</strong>
+                                                <div class="small text-muted">{{ paiement.reservation.client.email }}</div>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if paiement.reservation.vol %}
+                                            <div>
+                                                <strong>{{ paiement.reservation.vol.numVol }}</strong>
+                                                <div class="small text-muted">
+                                                    {{ paiement.reservation.vol.depart.codeIATA }} →
+                                                    {{ paiement.reservation.vol.arrivee.codeIATA }}
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">{{ paiement.montant|number_format(2, ',', ' ') }} €</strong>
+                                    </td>
+                                    <td>
+                                            <span class="badge bg-light text-dark">
+                                                {% if paiement.method == 'Carte Bancaire' %}
+                                                    <i class="fas fa-credit-card"></i>
+                                                {% elseif paiement.method == 'PayPal' %}
+                                                    <i class="fab fa-paypal"></i>
+                                                {% elseif paiement.method == 'Virement Bancaire' %}
+                                                    <i class="fas fa-university"></i>
+                                                {% else %}
+                                                    <i class="fas fa-money-bill-wave"></i>
+                                                {% endif %}
+                                                {{ paiement.method }}
+                                            </span>
+                                    </td>
+                                    <td>
+                                        {% if paiement.statut == 'confirmé' %}
+                                            <span class="badge badge-confirmed px-3 py-2">
+                                                    <i class="fas fa-check"></i> Confirmé
+                                                </span>
+                                        {% elseif paiement.statut == 'remboursé' %}
+                                            <span class="badge badge-refunded px-3 py-2">
+                                                    <i class="fas fa-undo"></i> Remboursé
+                                                </span>
+                                        {% else %}
+                                            <span class="badge badge-pending px-3 py-2">
+                                                    <i class="fas fa-clock"></i> {{ paiement.statut|capitalize }}
+                                                </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <div>{{ paiement.reservation.dateReservation|date('d/m/Y') }}</div>
+                                            <div class="text-muted">{{ paiement.reservation.dateReservation|date('H:i') }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_paiement_show', {'id': paiement.id}) }}"
+                                               class="action-btn btn btn-sm btn-info"
+                                               title="Voir détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if paiement.statut == 'confirmé' %}
+                                                <button type="button"
+                                                        class="action-btn btn btn-sm btn-danger"
+                                                        title="Rembourser"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#refundModal{{ paiement.id }}">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {# Refund Modal #}
+                                <div class="modal fade" id="refundModal{{ paiement.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-exclamation-triangle"></i> Confirmer le remboursement
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Êtes-vous sûr de vouloir rembourser ce paiement ?</p>
+                                                <div class="alert alert-warning">
+                                                    <strong>Cette action va :</strong>
+                                                    <ul class="mb-0">
+                                                        <li>Marquer le paiement comme remboursé</li>
+                                                        <li>Annuler la réservation associée</li>
+                                                        <li>Remettre les places disponibles dans le vol</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <strong>Montant à rembourser :</strong>
+                                                        <span class="text-danger">{{ paiement.montant|number_format(2, ',', ' ') }} €</span><br>
+                                                        <strong>Réservation :</strong> {{ paiement.reservation.reference }}<br>
+                                                        <strong>Client :</strong>
+                                                        {{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Annuler
+                                                </button>
+                                                <form method="post" action="{{ path('app_paiement_refund', {'id': paiement.id}) }}" style="display: inline;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('refund' ~ paiement.id) }}">
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="fas fa-undo"></i> Confirmer le remboursement
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun paiement trouvé</h5>
+                        <p class="text-muted">Les paiements apparaîtront ici une fois effectués</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const table = document.getElementById('paymentsTable');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+{% endblock %}

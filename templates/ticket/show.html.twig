@@ -1,38 +1,446 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ticket{% endblock %}
+{% block title %}Mon Billet {{ ticket.numero }} - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Ticket</h1>
+    <style>
+        .ticket-view-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ ticket.id }}</td>
-            </tr>
-            <tr>
-                <th>IdTicket</th>
-                <td>{{ ticket.idTicket }}</td>
-            </tr>
-            <tr>
-                <th>Numero</th>
-                <td>{{ ticket.numero }}</td>
-            </tr>
-            <tr>
-                <th>DateCreation</th>
-                <td>{{ ticket.dateCreation ? ticket.dateCreation|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>PdfPath</th>
-                <td>{{ ticket.pdfPath }}</td>
-            </tr>
-        </tbody>
-    </table>
+        .boarding-pass {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
 
-    <a href="{{ path('app_ticket_index') }}">back to list</a>
+        .boarding-pass-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2.5rem;
+            position: relative;
+        }
 
-    <a href="{{ path('app_ticket_edit', {'id': ticket.id}) }}">edit</a>
+        .boarding-pass-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
 
-    {{ include('ticket/_delete_form.html.twig') }}
+        .ticket-number-large {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .flight-info-main {
+            padding: 3rem 2.5rem;
+        }
+
+        .route-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2rem 0;
+        }
+
+        .airport-large {
+            flex: 1;
+            text-align: center;
+        }
+
+        .airport-code-large {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #667eea;
+            line-height: 1;
+        }
+
+        .airport-name-large {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .flight-path {
+            flex: 1.5;
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        .flight-path-line {
+            border-top: 2px dashed #28a745;
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .flight-icon {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            color: #28a745;
+            font-size: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .info-box-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #212529;
+        }
+
+        .qr-code-section {
+            background: #f8f9fa;
+            padding: 2.5rem;
+            text-align: center;
+            border-top: 2px dashed #dee2e6;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .barcode {
+            background: repeating-linear-gradient(
+                90deg,
+                #000,
+                #000 3px,
+                transparent 3px,
+                transparent 6px
+            );
+            height: 80px;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .status-banner {
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-valid {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .boarding-pass {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+
+    <div class="ticket-view-header no-print">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-ticket-alt"></i> Mon Billet</h1>
+                    <p class="mb-0 opacity-75">{{ ticket.numero }}</p>
+                </div>
+                <a href="{{ path('app_client_tickets') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left"></i> Mes Billets
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show no-print" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# Status Banner #}
+        {% if ticket.reservation.satut == 'confirmé' %}
+            <div class="status-banner status-valid">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <h4>Billet Valide</h4>
+                <p class="mb-0">Votre billet est confirmé et prêt à être utilisé</p>
+            </div>
+        {% elseif ticket.reservation.satut == 'annulé' %}
+            <div class="status-banner status-cancelled">
+                <i class="fas fa-times-circle fa-2x mb-2"></i>
+                <h4>Billet Annulé</h4>
+                <p class="mb-0">Ce billet n'est plus valide</p>
+            </div>
+        {% endif %}
+
+        {# Boarding Pass #}
+        <div class="boarding-pass">
+            <div class="boarding-pass-header">
+                <div class="text-center mb-3">
+                    <h5 class="opacity-75 mb-1">BILLET ÉLECTRONIQUE / E-TICKET</h5>
+                    <div class="ticket-number-large">{{ ticket.numero }}</div>
+                </div>
+            </div>
+
+            {% if ticket.vol %}
+                <div class="flight-info-main">
+                    <div class="route-display">
+                        <div class="airport-large">
+                            <div class="airport-code-large">
+                                {{ ticket.vol.depart.codeIATA|default(ticket.vol.depart.ville|slice(0, 3)|upper) }}
+                            </div>
+                            <div class="airport-name-large">{{ ticket.vol.depart.ville }}</div>
+                            <small class="text-muted">{{ ticket.vol.depart.pays }}</small>
+                        </div>
+
+                        <div class="flight-path">
+                            <div class="text-muted small mb-2">VOL {{ ticket.vol.numVol }}</div>
+                            <div class="flight-path-line">
+                                <div class="flight-icon">
+                                    <i class="fas fa-plane"></i>
+                                </div>
+                            </div>
+                            <div class="text-muted small mt-2">
+                                {% set duration = date(ticket.vol.dateArrivee).timestamp - date(ticket.vol.dateDepart).timestamp %}
+                                {{ (duration / 3600)|round }} heures
+                            </div>
+                        </div>
+
+                        <div class="airport-large">
+                            <div class="airport-code-large">
+                                {{ ticket.vol.arrivee.codeIATA|default(ticket.vol.arrivee.ville|slice(0, 3)|upper) }}
+                            </div>
+                            <div class="airport-name-large">{{ ticket.vol.arrivee.ville }}</div>
+                            <small class="text-muted">{{ ticket.vol.arrivee.pays }}</small>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <div class="info-box-label">Date</div>
+                            <div class="info-box-value">{{ ticket.vol.dateDepart|date('d/m/Y') }}</div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-box-label">Départ</div>
+                            <div class="info-box-value">{{ ticket.vol.dateDepart|date('H:i') }}</div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-box-label">Arrivée</div>
+                            <div class="info-box-value">{{ ticket.vol.dateArrivee|date('H:i') }}</div>
+                        </div>
+
+                        {% if ticket.vol.avion %}
+                            <div class="info-box">
+                                <div class="info-box-label">Avion</div>
+                                <div class="info-box-value" style="font-size: 1.1rem;">{{ ticket.vol.avion.modele }}</div>
+                                <small class="text-muted">{{ ticket.vol.avion.immatriculation }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Passenger Info #}
+                    {% if ticket.passager %}
+                        <div class="card bg-light mt-4">
+                            <div class="card-body">
+                                <h5 class="mb-3"><i class="fas fa-user"></i> Informations Passager</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Nom Complet:</strong><br>
+                                        <span class="h5">{{ ticket.passager.nom }} {{ ticket.passager.prenom }}</span>
+                                    </div>
+                                    {% if ticket.passager.dateNaissance %}
+                                        <div class="col-md-3">
+                                            <strong>Date de Naissance:</strong><br>
+                                            {{ ticket.passager.dateNaissance|date('d/m/Y') }}
+                                        </div>
+                                    {% endif %}
+                                    {% if ticket.passager.numeroPasseport %}
+                                        <div class="col-md-3">
+                                            <strong>N° Passeport:</strong><br>
+                                            {{ ticket.passager.numeroPasseport }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Reservation Info #}
+                    <div class="card bg-light mt-3">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <strong>Référence Réservation</strong><br>
+                                    <span class="font-monospace h6">{{ ticket.reservation.reference }}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Date Réservation</strong><br>
+                                    {{ ticket.reservation.dateReservation|date('d/m/Y') }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Date Émission</strong><br>
+                                    {{ ticket.dateCreation|date('d/m/Y') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="flight-info-main">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Les informations de vol ne sont pas disponibles pour ce billet.
+                    </div>
+                </div>
+            {% endif %}
+
+            {# QR Code & Barcode Section #}
+            <div class="qr-code-section">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="qr-code">
+                            <i class="fas fa-qrcode fa-5x text-secondary"></i>
+                        </div>
+                        <small class="text-muted d-block mt-2">Scannez ce code à l'aéroport</small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="barcode"></div>
+                        <div class="font-monospace text-center mt-2">
+                            {{ ticket.idTicket }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Action Buttons #}
+        <div class="row g-3 no-print mb-4">
+            <div class="col-md-3">
+                <button onclick="window.print()" class="btn btn-primary w-100 btn-lg">
+                    <i class="fas fa-print"></i> Imprimer
+                </button>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ path('app_client_ticket_download', {'id': ticket.id}) }}"
+                   class="btn btn-success w-100 btn-lg">
+                    <i class="fas fa-download"></i> Télécharger PDF
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="mailto:?subject=Mon billet {{ ticket.numero }}"
+                   class="btn btn-info w-100 btn-lg">
+                    <i class="fas fa-envelope"></i> Envoyer par Email
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ path('app_client_tickets') }}"
+                   class="btn btn-outline-secondary w-100 btn-lg">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        {# Important Information #}
+        <div class="row no-print">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Avant le Départ</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li class="mb-2">Arrivez <strong>2 heures avant</strong> le départ</li>
+                            <li class="mb-2">Munissez-vous d'une <strong>pièce d'identité valide</strong></li>
+                            <li class="mb-2">Vérifiez les <strong>restrictions de bagages</strong></li>
+                            <li class="mb-2">Présentez ce billet à l'enregistrement</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li class="mb-2">Ce billet est <strong>nominatif et non transférable</strong></li>
+                            <li class="mb-2">Conservez-le jusqu'à la fin de votre voyage</li>
+                            <li class="mb-2">En cas de problème, contactez notre service client</li>
+                            <li class="mb-2">Numéro d'urgence : <strong>+216 XX XXX XXX</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
 {% endblock %}

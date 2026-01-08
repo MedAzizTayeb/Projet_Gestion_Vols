@@ -92,6 +92,16 @@
     </div>
 
     <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         <div class="row">
             <div class="col-lg-8">
                 <div class="payment-card">
@@ -99,8 +109,7 @@
                         <i class="fas fa-wallet"></i> Choisissez votre méthode de paiement
                     </h4>
 
-                    <form method="post" action="{{ path('app_paiement_new') }}" id="payment-form">
-                        <input type="hidden" name="reservation_id" value="{{ reservation.id }}">
+                    <form method="post" action="{{ path('app_paiement_new', {'reservationId': reservation.id}) }}" id="payment-form">
 
                         <!-- Méthodes de paiement -->
                         <div class="payment-method active" data-method="carte">
@@ -187,7 +196,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Titulaire de la carte</label>
-                                    <input type="text" class="form-control" placeholder="Nom sur la carte" required>
+                                    <input type="text" class="form-control" placeholder="Nom sur la carte">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Expiration</label>
@@ -207,9 +216,6 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="montant" value="{{ reservation.vol.avion.capacite * 100 }}">
-                        <input type="hidden" name="statut" value="en attente">
-
                         <div class="form-check mt-4">
                             <input class="form-check-input" type="checkbox" id="terms" required>
                             <label class="form-check-label" for="terms">
@@ -220,7 +226,7 @@
 
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-lock"></i> Payer Maintenant
+                                <i class="fas fa-lock"></i> Payer {{ montantTotal|number_format(2, ',', ' ') }} €
                             </button>
                             <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}"
                                class="btn btn-outline-secondary">
@@ -256,12 +262,21 @@
                         <strong>{{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}</strong>
                     </div>
 
+                    <div class="mb-3">
+                        <div class="text-muted small">Nombre de passagers</div>
+                        <strong>{{ nbPassagers }} passager(s)</strong>
+                    </div>
+
                     <hr>
 
                     <div class="price-breakdown">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Prix du billet</span>
-                            <strong>À confirmer</strong>
+                            <span>Prix du billet (x{{ nbPassagers }})</span>
+                            <strong>{{ prixParBillet|number_format(2, ',', ' ') }} €</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Sous-total</span>
+                            <strong>{{ (prixParBillet * nbPassagers)|number_format(2, ',', ' ') }} €</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Taxes et frais</span>
@@ -275,8 +290,8 @@
 
                     <div class="border-top pt-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <strong>Total</strong>
-                            <div class="total-amount">À confirmer</div>
+                            <strong>Total à payer</strong>
+                            <div class="total-amount">{{ montantTotal|number_format(2, ',', ' ') }} €</div>
                         </div>
                     </div>
 
@@ -328,5 +343,14 @@
                 e.target.value = formattedValue;
             });
         }
+
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
     </script>
 {% endblock %}

@@ -26,6 +26,13 @@
             font-size: 5rem;
             color: white;
         }
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
     </style>
 
     <div class="container py-5">
@@ -38,48 +45,117 @@
                         </div>
 
                         <h1 class="mb-3 text-success">Paiement Réussi !</h1>
-                        <p class="lead mb-4">Votre réservation a été confirmée</p>
+                        <p class="lead mb-4">Votre réservation a été confirmée avec succès</p>
 
-                        <div class="alert alert-success">
-                            <strong>Référence de paiement:</strong> PAY-{{ paiement.id }}
-                            <br>
-                            <strong>Montant:</strong> {{ paiement.montant }} €
-                            <br>
-                            <strong>Méthode:</strong> {{ paiement.method }}
-                        </div>
-
-                        <hr class="my-4">
-
-                        <h4 class="mb-3">Détails de votre réservation</h4>
-
-                        <div class="card bg-light mb-4">
-                            <div class="card-body">
-                                <div class="row text-start">
-                                    <div class="col-md-6">
-                                        <strong>Référence:</strong> {{ reservation.reference }}<br>
-                                        <strong>Vol:</strong> {{ reservation.vol.numVol }}<br>
-                                        <strong>Date:</strong> {{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>De:</strong> {{ reservation.vol.depart.ville }}<br>
-                                        <strong>À:</strong> {{ reservation.vol.arrivee.ville }}<br>
-                                        <strong>Billets générés:</strong> {{ reservation.tickets|length }}
-                                    </div>
+                        <div class="alert alert-success mb-4">
+                            <div class="row text-start">
+                                <div class="col-md-4 mb-2 mb-md-0">
+                                    <strong><i class="fas fa-hashtag"></i> Référence:</strong><br>
+                                    <span class="font-monospace">PAY-{{ paiement.id }}</span>
+                                </div>
+                                <div class="col-md-4 mb-2 mb-md-0">
+                                    <strong><i class="fas fa-money-bill-wave"></i> Montant:</strong><br>
+                                    {{ paiement.montant|number_format(2, ',', ' ') }} €
+                                </div>
+                                <div class="col-md-4">
+                                    <strong><i class="fas fa-credit-card"></i> Méthode:</strong><br>
+                                    {{ paiement.method }}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="alert alert-info">
+                        <hr class="my-4">
+
+                        <h4 class="mb-4">
+                            <i class="fas fa-ticket-alt text-primary"></i> Détails de votre réservation
+                        </h4>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="info-card text-start">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fas fa-bookmark"></i> Référence de réservation
+                                    </div>
+                                    <strong class="font-monospace">{{ reservation.reference }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card text-start">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fas fa-plane"></i> Numéro de vol
+                                    </div>
+                                    <strong>{{ reservation.vol.numVol }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card text-start">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fas fa-calendar-alt"></i> Date de départ
+                                    </div>
+                                    <strong>{{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card text-start">
+                                    <div class="text-muted small mb-1">
+                                        <i class="fas fa-route"></i> Trajet
+                                    </div>
+                                    <strong>
+                                        {{ reservation.vol.depart.ville }}
+                                        <i class="fas fa-arrow-right text-primary"></i>
+                                        {{ reservation.vol.arrivee.ville }}
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if reservation.tickets is defined and reservation.tickets|length > 0 %}
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <div class="row text-start">
+                                        <div class="col-md-12">
+                                            <h5 class="mb-3">
+                                                <i class="fas fa-ticket-alt text-success"></i> Vos billets
+                                            </h5>
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle"></i>
+                                                <strong>{{ reservation.tickets|length }} billet(s)</strong> ont été générés pour votre réservation
+                                            </div>
+
+                                            <div class="list-group">
+                                                {% for ticket in reservation.tickets %}
+                                                    <div class="list-group-item">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>Billet #{{ loop.index }}</strong><br>
+                                                                <small class="text-muted font-monospace">{{ ticket.numero }}</small>
+                                                            </div>
+                                                            <span class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Généré
+                                                    </span>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="alert alert-info mb-4">
                             <i class="fas fa-envelope"></i>
-                            Un email de confirmation avec vos billets a été envoyé à votre adresse.
+                            <strong>Confirmation envoyée !</strong><br>
+                            Un email de confirmation avec vos informations de vol a été envoyé à votre adresse email.
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
-                            <a href="{{ path('app_client_tickets') }}" class="btn btn-success btn-lg">
-                                <i class="fas fa-ticket-alt"></i> Voir mes Billets
+                            <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}"
+                               class="btn btn-success btn-lg">
+                                <i class="fas fa-eye"></i> Voir ma Réservation
                             </a>
-                            <a href="{{ path('app_client_reservations') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-list"></i> Mes Réservations
+                            <a href="{{ path('app_client_dashboard') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-th-large"></i> Tableau de bord
                             </a>
                             <a href="{{ path('app_vol_index') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-plane"></i> Rechercher d'autres vols
@@ -88,28 +164,109 @@
                     </div>
                 </div>
 
-                <div class="card mt-4">
+                <div class="card mt-4 border-warning">
                     <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Prochaines étapes</h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Prochaines étapes
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <ol>
-                            <li class="mb-2">
-                                <strong>Téléchargez vos billets</strong> depuis votre espace client
-                            </li>
-                            <li class="mb-2">
-                                <strong>Vérifiez vos emails</strong> pour la confirmation
-                            </li>
-                            <li class="mb-2">
-                                <strong>Arrivez 2 heures avant le départ</strong> à l'aéroport
-                            </li>
-                            <li class="mb-2">
-                                <strong>Présentez votre billet</strong> et une pièce d'identité
-                            </li>
-                        </ol>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-warning bg-opacity-25 rounded-circle p-3">
+                                            <i class="fas fa-download fa-lg text-warning"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <strong>1. Téléchargez vos billets</strong>
+                                        <p class="mb-0 small text-muted">
+                                            Accédez à vos billets depuis votre espace client
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-info bg-opacity-25 rounded-circle p-3">
+                                            <i class="fas fa-envelope fa-lg text-info"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <strong>2. Vérifiez vos emails</strong>
+                                        <p class="mb-0 small text-muted">
+                                            Un email de confirmation a été envoyé
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-primary bg-opacity-25 rounded-circle p-3">
+                                            <i class="fas fa-clock fa-lg text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <strong>3. Arrivez à l'heure</strong>
+                                        <p class="mb-0 small text-muted">
+                                            Présentez-vous 2 heures avant le départ
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-success bg-opacity-25 rounded-circle p-3">
+                                            <i class="fas fa-id-card fa-lg text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <strong>4. Préparez vos documents</strong>
+                                        <p class="mb-0 small text-muted">
+                                            Billet électronique et pièce d'identité valide
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-body text-center">
+                        <h5 class="mb-3">
+                            <i class="fas fa-headset text-primary"></i> Besoin d'aide ?
+                        </h5>
+                        <p class="text-muted mb-3">
+                            Notre équipe de support est disponible 24/7 pour vous aider
+                        </p>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="fas fa-phone"></i> Nous contacter
+                            </a>
+                            <a href="#" class="btn btn-outline-info">
+                                <i class="fas fa-question-circle"></i> FAQ
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Confetti animation (optional - requires canvas-confetti library)
+        // You can add this library or remove this script
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simple success sound (optional)
+            console.log('Payment successful!');
+        });
+    </script>
 {% endblock %}
