@@ -20,7 +20,7 @@ class Client
     private ?string $telephone = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateInscription = null;
+    private ?\DateTime $dateInscription = null;
 
     #[ORM\OneToOne(inversedBy: 'client', cascade: ['persist', 'remove'])]
     private ?Utilisateur $user = null;
@@ -53,12 +53,12 @@ class Client
         return $this;
     }
 
-    public function getDateInscription(): ?\DateTimeInterface
+    public function getDateInscription(): ?\DateTime
     {
         return $this->dateInscription;
     }
 
-    public function setDateInscription(\DateTimeInterface $dateInscription): static
+    public function setDateInscription(\DateTime $dateInscription): static
     {
         $this->dateInscription = $dateInscription;
 

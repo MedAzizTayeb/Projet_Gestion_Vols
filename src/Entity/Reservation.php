@@ -19,7 +19,7 @@ class Reservation
     private ?string $Reference = null;
 
     #[ORM\Column]
-    private ?\DateTimeInterface $DateRes = null;
+    private ?\DateTime $DateRes = null;
 
     #[ORM\Column(length: 50)]
     private ?string $Satut = null;
@@ -68,12 +68,12 @@ class Reservation
         return $this;
     }
 
-    public function getDateRes(): ?\DateTimeInterface
+    public function getDateRes(): ?\DateTime
     {
         return $this->DateRes;
     }
 
-    public function setDateRes(\DateTimeInterface $DateRes): static
+    public function setDateRes(\DateTime $DateRes): static
     {
         $this->DateRes = $DateRes;
 

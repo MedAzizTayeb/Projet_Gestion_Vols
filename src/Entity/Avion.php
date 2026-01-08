@@ -44,7 +44,7 @@ class Avion
     private ?int $heuresVol = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $derniereMaintenance = null;
+    private ?\DateTime $derniereMaintenance = null;
 
     public function __construct()
     {
@@ -162,12 +162,12 @@ class Avion
         return $this;
     }
 
-    public function getDerniereMaintenance(): ?\DateTimeInterface
+    public function getDerniereMaintenance(): ?\DateTime
     {
         return $this->derniereMaintenance;
     }
 
-    public function setDerniereMaintenance(?\DateTimeInterface $derniereMaintenance): static
+    public function setDerniereMaintenance(?\DateTime $derniereMaintenance): static
     {
         $this->derniereMaintenance = $derniereMaintenance;
         return $this;

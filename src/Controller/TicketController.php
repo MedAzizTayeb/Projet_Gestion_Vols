@@ -17,7 +17,6 @@ class TicketController extends AbstractController
 {
     // Client routes
     #[Route('/', name: 'app_ticket_index', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
     public function index(TicketRepository $ticketRepository): Response
     {
         $user = $this->getUser();
@@ -50,7 +49,6 @@ class TicketController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_ticket_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
     public function show(Ticket $ticket): Response
     {
         $user = $this->getUser();

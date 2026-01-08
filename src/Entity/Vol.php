@@ -19,10 +19,10 @@ class Vol
     private ?string $NumVol = null;
 
     #[ORM\Column]
-    private ?\DateTimeInterface $DateDepart = null;
+    private ?\DateTime $DateDepart = null;
 
     #[ORM\Column]
-    private ?\DateTimeInterface $DateArrive = null;
+    private ?\DateTime $DateArrive = null;
 
     #[ORM\Column(length: 255)]
     private ?string $port = null;
@@ -84,23 +84,23 @@ class Vol
         return $this;
     }
 
-    public function getDateDepart(): ?\DateTimeInterface
+    public function getDateDepart(): ?\DateTime
     {
         return $this->DateDepart;
     }
 
-    public function setDateDepart(\DateTimeInterface $DateDepart): static
+    public function setDateDepart(\DateTime $DateDepart): static
     {
         $this->DateDepart = $DateDepart;
         return $this;
     }
 
-    public function getDateArrive(): ?\DateTimeInterface
+    public function getDateArrive(): ?\DateTime
     {
         return $this->DateArrive;
     }
 
-    public function setDateArrive(\DateTimeInterface $DateArrive): static
+    public function setDateArrive(\DateTime $DateArrive): static
     {
         $this->DateArrive = $DateArrive;
         return $this;

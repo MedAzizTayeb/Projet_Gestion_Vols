@@ -49,10 +49,10 @@ class Administrateur implements UserInterface, PasswordAuthenticatedUserInterfac
     private ?string $telephone = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $dateCreation = null;
+    private ?\DateTime $dateCreation = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dernierConnexion = null;
+    private ?\DateTime $dernierConnexion = null;
 
     #[ORM\Column]
     private ?bool $actif = true;
@@ -203,23 +203,23 @@ class Administrateur implements UserInterface, PasswordAuthenticatedUserInterfac
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTimeInterface
+    public function getDateCreation(): ?\DateTime
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTimeInterface $dateCreation): static
+    public function setDateCreation(\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
         return $this;
     }
 
-    public function getDernierConnexion(): ?\DateTimeInterface
+    public function getDernierConnexion(): ?\DateTime
     {
         return $this->dernierConnexion;
     }
 
-    public function setDernierConnexion(?\DateTimeInterface $dernierConnexion): static
+    public function setDernierConnexion(?\DateTime $dernierConnexion): static
     {
         $this->dernierConnexion = $dernierConnexion;
         return $this;

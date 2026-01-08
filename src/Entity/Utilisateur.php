@@ -42,7 +42,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?bool $actif = true;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $dateCreation = null;
+    private ?\DateTime $dateCreation = null;
 
     public function __construct()
     {
@@ -165,12 +165,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTimeInterface
+    public function getDateCreation(): ?\DateTime
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(?\DateTimeInterface $dateCreation): static
+    public function setDateCreation(?\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
         return $this;
