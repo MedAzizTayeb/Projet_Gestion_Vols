@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Passagers - AeroManager{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-users text-primary"></i> Passagers de la Réservation
+            </h1>
+            <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+
+        <div class="alert alert-info mb-4">
+            <strong>Réservation:</strong> {{ reservation.reference }} |
+            <strong>Vol:</strong> {{ reservation.vol.numVol }} |
+            <strong>Passagers enregistrés:</strong> {{ passagers|length }}
+        </div>
+
+        {% if passagers is empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                <h3 class="text-muted">Aucun passager enregistré</h3>
+                <a href="{{ path('app_passager_add', {'reservationId': reservation.id}) }}"
+                   class="btn btn-primary mt-3">
+                    <i class="fas fa-plus"></i> Ajouter des Passagers
+                </a>
+            </div>
+        {% else %}
+            <div class="row">
+                {% for passager in passagers %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user"></i> Passager {{ loop.index }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>Passeport:</strong> {{ passager.numPassport }}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Nationalité:</strong> {{ passager.nationalite }}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Date de Naissance:</strong>
+                                    {{ passager.dateNaissance|date('d/m/Y') }}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Bagages:</strong> {{ passager.poidsBagages }} kg
+                                </div>
+                                {% if passager.besoinsSpeciaux %}
+                                    <div class="alert alert-warning p-2 mt-2 mb-0">
+                                        <small><strong>Besoins spéciaux:</strong><br>{{ passager.besoinsSpeciaux }}</small>
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-flex gap-2 mt-3">
+                                    <a href="{{ path('app_passager_edit', {'id': passager.id}) }}"
+                                       class="btn btn-sm btn-warning flex-fill">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <form method="post"
+                                          action="{{ path('app_passager_delete', {'id': passager.id}) }}"
+                                          onsubmit="return confirm('Supprimer ce passager ?');"
+                                          class="flex-fill">
+                                        <input type="hidden" name="_token"
+                                               value="{{ csrf_token('delete' ~ passager.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_passager_add', {'reservationId': reservation.id}) }}"
+                   class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Ajouter d'autres Passagers
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil - AeroManager{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <h1 class="mb-4">
+            <i class="fas fa-user-circle text-primary"></i> Mon Profil
+        </h1>
+
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <div class="display-1 text-primary mb-3">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h4>{{ client.user.nomComplet }}</h4>
+                        <p class="text-muted">{{ client.user.email }}</p>
+
+                        <div class="border-top pt-3 mt-3">
+                            <div class="text-muted small">Membre depuis</div>
+                            <strong>{{ client.dateInscription|date('d/m/Y') }}</strong>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Modifier le profil
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-key"></i> Changer mot de passe
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations Personnelles</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small">Nom</label>
+                                <div class="h6">{{ client.user.nom }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small">Prénom</label>
+                                <div class="h6">{{ client.user.prenom }}</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small">Email</label>
+                                <div class="h6">{{ client.user.email }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small">Téléphone</label>
+                                <div class="h6">{{ client.telephone ?: 'Non renseigné' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    <div class="h2 text-primary mb-0">{{ client.reservations|length }}</div>
+                                    <small class="text-muted">Réservations</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set confirmed = client.reservations|filter(r => r.satut == 'confirmé')|length %}
+                                    <div class="h2 text-success mb-0">{{ confirmed }}</div>
+                                    <small class="text-muted">Confirmées</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set tickets_count = 0 %}
+                                    {% for reservation in client.reservations %}
+                                        {% set tickets_count = tickets_count + reservation.tickets|length %}
+                                    {% endfor %}
+                                    <div class="h2 text-info mb-0">{{ tickets_count }}</div>
+                                    <small class="text-muted">Billets</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

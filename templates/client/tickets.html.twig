@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Billets - AeroManager{% endblock %}
+
+{% block body %}
+    <style>
+        .ticket-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border-left: 5px solid #28a745;
+        }
+        .ticket-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+        .ticket-body {
+            padding: 2rem;
+        }
+        .qr-code {
+            width: 120px;
+            height: 120px;
+            background: #f0f0f0;
+            border: 2px dashed #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+        .boarding-pass {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 2px dashed #dee2e6;
+        }
+    </style>
+
+    <div class="container py-4">
+        <h1 class="mb-4">
+            <i class="fas fa-ticket-alt text-success"></i> Mes Billets
+        </h1>
+
+        {% if tickets is empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-ticket-alt fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                <h3 class="text-muted">Aucun billet</h3>
+                <p class="text-muted">Vos billets apparaîtront ici après paiement de vos réservations</p>
+                <a href="{{ path('app_vol_index') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-search"></i> Rechercher des vols
+                </a>
+            </div>
+        {% else %}
+            {% for ticket in tickets %}
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Billet N° {{ ticket.numero }}</h5>
+                                <small>Réservation: {{ ticket.reservation.reference }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="badge bg-light text-dark">
+                                    {{ ticket.vol ? ticket.vol.numVol : 'N/A' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ticket-body">
+                        {% if ticket.vol %}
+                            <div class="boarding-pass mb-4">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <div class="text-muted small">De</div>
+                                                <div class="h4 mb-0">{{ ticket.vol.depart.codeIATA }}</div>
+                                                <div class="small">{{ ticket.vol.depart.ville }}</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-muted small">À</div>
+                                                <div class="h4 mb-0">{{ ticket.vol.arrivee.codeIATA }}</div>
+                                                <div class="small">{{ ticket.vol.arrivee.ville }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="text-muted small">Date</div>
+                                                <strong>{{ ticket.vol.dateDepart|date('d/m/Y') }}</strong>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="text-muted small">Départ</div>
+                                                <strong>{{ ticket.vol.dateDepart|date('H:i') }}</strong>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="text-muted small">Porte</div>
+                                                <strong>{{ ticket.vol.port }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 text-center">
+                                        <div class="qr-code mx-auto">
+                                            <i class="fas fa-qrcode fa-3x text-muted"></i>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Code QR</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Important:</strong> Présentez-vous 2 heures avant le départ avec ce billet et une pièce d'identité.
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary flex-fill" onclick="window.print()">
+                                <i class="fas fa-print"></i> Imprimer
+                            </button>
+                            <button class="btn btn-success flex-fill">
+                                <i class="fas fa-download"></i> Télécharger PDF
+                            </button>
+                            <button class="btn btn-info">
+                                <i class="fas fa-envelope"></i> Envoyer par email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,11 +1,332 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Paiement{% endblock %}
+{% block title %}Paiement - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Create new Paiement</h1>
+    <style>
+        .payment-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
 
-    {{ include('paiement/_form.html.twig') }}
+        .payment-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
 
-    <a href="{{ path('app_paiement_index') }}">back to list</a>
+        .payment-method {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .payment-method:hover {
+            border-color: #28a745;
+            background: #f8f9fa;
+        }
+
+        .payment-method.active {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .payment-method input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #28a745;
+        }
+
+        .price-breakdown {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .total-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .credit-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            min-height: 200px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .card-chip {
+            width: 50px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .card-number {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            margin: 1.5rem 0;
+        }
+    </style>
+
+    <div class="payment-header">
+        <div class="container text-center">
+            <h1><i class="fas fa-credit-card"></i> Paiement Sécurisé</h1>
+            <p class="mb-0 opacity-75">Finalisez votre réservation</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="payment-card">
+                    <h4 class="mb-4">
+                        <i class="fas fa-wallet"></i> Choisissez votre méthode de paiement
+                    </h4>
+
+                    <form method="post" action="{{ path('app_paiement_new') }}" id="payment-form">
+                        <input type="hidden" name="reservation_id" value="{{ reservation.id }}">
+
+                        <!-- Méthodes de paiement -->
+                        <div class="payment-method active" data-method="carte">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="method" value="Carte Bancaire" id="carte" checked>
+                                <label for="carte" class="mb-0 flex-fill cursor-pointer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong><i class="fas fa-credit-card"></i> Carte Bancaire</strong>
+                                            <div class="text-muted small">Visa, Mastercard, American Express</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <i class="fab fa-cc-visa fa-2x text-primary"></i>
+                                            <i class="fab fa-cc-mastercard fa-2x text-danger"></i>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="payment-method" data-method="paypal">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="method" value="PayPal" id="paypal">
+                                <label for="paypal" class="mb-0 flex-fill cursor-pointer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong><i class="fab fa-paypal"></i> PayPal</strong>
+                                            <div class="text-muted small">Paiement rapide et sécurisé</div>
+                                        </div>
+                                        <i class="fab fa-paypal fa-3x" style="color: #003087;"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="payment-method" data-method="virement">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="method" value="Virement Bancaire" id="virement">
+                                <label for="virement" class="mb-0 flex-fill cursor-pointer">
+                                    <div>
+                                        <strong><i class="fas fa-university"></i> Virement Bancaire</strong>
+                                        <div class="text-muted small">Confirmation sous 1-3 jours ouvrés</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="payment-method" data-method="especes">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="method" value="Paiement à l'Aéroport" id="especes">
+                                <label for="especes" class="mb-0 flex-fill cursor-pointer">
+                                    <div>
+                                        <strong><i class="fas fa-money-bill-wave"></i> Paiement à l'Aéroport</strong>
+                                        <div class="text-muted small">Payez en espèces ou par carte au comptoir</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Détails carte bancaire (affiché si carte sélectionnée) -->
+                        <div id="card-details" class="mt-4">
+                            <h5 class="mb-3">Informations de la carte</h5>
+
+                            <div class="credit-card">
+                                <div class="card-chip"></div>
+                                <div class="card-number">•••• •••• •••• ••••</div>
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <div>
+                                        <div class="small opacity-75">Titulaire</div>
+                                        <div>VOTRE NOM</div>
+                                    </div>
+                                    <div>
+                                        <div class="small opacity-75">Expire</div>
+                                        <div>MM/AA</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">Numéro de carte</label>
+                                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456"
+                                           maxlength="19" pattern="[0-9\s]*">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Titulaire de la carte</label>
+                                    <input type="text" class="form-control" placeholder="Nom sur la carte" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Expiration</label>
+                                    <input type="text" class="form-control" placeholder="MM/AA"
+                                           maxlength="5" pattern="[0-9/]*">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">CVV</label>
+                                    <input type="text" class="form-control" placeholder="123"
+                                           maxlength="4" pattern="[0-9]*">
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-lock"></i>
+                                <small>Vos informations de paiement sont sécurisées et cryptées</small>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="montant" value="{{ reservation.vol.avion.capacite * 100 }}">
+                        <input type="hidden" name="statut" value="en attente">
+
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                J'accepte les <a href="#" target="_blank">conditions générales de vente</a>
+                                et la <a href="#" target="_blank">politique de confidentialité</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-lock"></i> Payer Maintenant
+                            </button>
+                            <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}"
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Récapitulatif -->
+                <div class="payment-card sticky-top" style="top: 20px;">
+                    <h4 class="mb-4">
+                        <i class="fas fa-receipt"></i> Récapitulatif
+                    </h4>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Réservation</div>
+                        <strong class="font-monospace">{{ reservation.reference }}</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Vol</div>
+                        <strong>{{ reservation.vol.numVol }}</strong>
+                        <div class="small">
+                            {{ reservation.vol.depart.ville }} → {{ reservation.vol.arrivee.ville }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Date de départ</div>
+                        <strong>{{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="price-breakdown">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Prix du billet</span>
+                            <strong>À confirmer</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Taxes et frais</span>
+                            <strong>Inclus</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Réduction</span>
+                            <strong>-0%</strong>
+                        </div>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>Total</strong>
+                            <div class="total-amount">À confirmer</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success mt-3 mb-0">
+                        <i class="fas fa-shield-alt"></i>
+                        <small><strong>Paiement 100% sécurisé</strong><br>
+                            Vos données sont protégées par cryptage SSL</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Gestion de la sélection de méthode de paiement
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        const cardDetails = document.getElementById('card-details');
+
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', function() {
+                paymentMethods.forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                this.querySelector('input[type="radio"]').checked = true;
+
+                // Afficher/cacher les détails de carte
+                if (this.dataset.method === 'carte') {
+                    cardDetails.style.display = 'block';
+                } else {
+                    cardDetails.style.display = 'none';
+                }
+            });
+        });
+
+        // Validation du formulaire
+        document.getElementById('payment-form').addEventListener('submit', function(e) {
+            const termsCheck = document.getElementById('terms');
+            if (!termsCheck.checked) {
+                e.preventDefault();
+                alert('Veuillez accepter les conditions générales de vente');
+            }
+        });
+
+        // Formatage numéro de carte (ajout espaces tous les 4 chiffres)
+        const cardInput = document.querySelector('input[placeholder="1234 5678 9012 3456"]');
+        if (cardInput) {
+            cardInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formattedValue;
+            });
+        }
+    </script>
 {% endblock %}

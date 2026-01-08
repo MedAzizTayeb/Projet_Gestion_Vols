@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réserver un Vol - AeroManager{% endblock %}
+
+{% block body %}
+    <style>
+        .booking-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .flight-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .route-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .airport-info {
+            text-align: center;
+        }
+
+        .airport-code {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            font-family: monospace;
+        }
+
+        .passenger-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .quantity-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quantity-btn:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+        }
+
+        .quantity-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .quantity-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+
+    <div class="booking-header">
+        <div class="container text-center">
+            <h1><i class="fas fa-ticket-alt"></i> Réserver votre Vol</h1>
+            <p class="mb-0 opacity-75">Sélectionnez le nombre de passagers</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Résumé du vol -->
+                <div class="flight-summary">
+                    <h4 class="mb-4">
+                        <i class="fas fa-plane"></i> Vol {{ vol.numVol }}
+                    </h4>
+
+                    <div class="route-display">
+                        <div class="airport-info">
+                            <div class="airport-code">{{ vol.depart.codeIATA }}</div>
+                            <div class="h5 mt-2">{{ vol.depart.ville }}</div>
+                            <small class="text-muted">{{ vol.depart.pays }}</small>
+                        </div>
+
+                        <div class="text-center">
+                            <i class="fas fa-plane fa-3x text-primary"></i>
+                            {% if vol.escale %}
+                                <div class="mt-2 text-muted small">
+                                    <i class="fas fa-exchange-alt"></i> {{ vol.escale }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="airport-info">
+                            <div class="airport-code">{{ vol.arrivee.codeIATA }}</div>
+                            <div class="h5 mt-2">{{ vol.arrivee.ville }}</div>
+                            <small class="text-muted">{{ vol.arrivee.pays }}</small>
+                        </div>
+                    </div>
+
+                    <div class="row text-center border-top pt-3">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="text-muted small">Date de départ</div>
+                            <strong><i class="fas fa-calendar"></i> {{ vol.dateDepart|date('d/m/Y') }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="text-muted small">Heure de départ</div>
+                            <strong><i class="fas fa-clock"></i> {{ vol.dateDepart|date('H:i') }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small">Places disponibles</div>
+                            <strong><i class="fas fa-chair"></i> {{ vol.placesDisponibles }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sélection du nombre de passagers -->
+                <div class="passenger-selector">
+                    <h4 class="mb-4 text-center">
+                        <i class="fas fa-users"></i> Nombre de Passagers
+                    </h4>
+
+                    <form method="post" action="{{ path('app_reservation_create', {'volId': vol.id}) }}">
+                        <div class="quantity-control mb-4">
+                            <button type="button" class="quantity-btn" id="decrease-btn">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <div class="quantity-display" id="passenger-count">1</div>
+                            <button type="button" class="quantity-btn" id="increase-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+
+                        <input type="hidden" name="nb_passagers" id="nb_passagers" value="1">
+
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Maximum:</strong> 9 passagers par réservation
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <div class="text-muted">Prix estimé</div>
+                            <div class="h2 text-primary">
+                                <span id="total-price">À confirmer</span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check"></i> Confirmer la Réservation
+                            </button>
+                            <a href="{{ path('app_vol_show', {'id': vol.id}) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour au vol
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Informations importantes -->
+                <div class="alert alert-warning mt-4">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Informations Importantes</h6>
+                    <ul class="mb-0">
+                        <li>Une fois la réservation confirmée, vous devrez procéder au paiement</li>
+                        <li>Les billets seront générés après confirmation du paiement</li>
+                        <li>Vous pourrez ajouter les détails des passagers ultérieurement</li>
+                        <li>Présentez-vous à l'aéroport 2 heures avant le départ</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const maxPassengers = Math.min(9, {{ vol.placesDisponibles }});
+        let currentCount = 1;
+
+        const countDisplay = document.getElementById('passenger-count');
+        const hiddenInput = document.getElementById('nb_passagers');
+        const decreaseBtn = document.getElementById('decrease-btn');
+        const increaseBtn = document.getElementById('increase-btn');
+
+        function updateDisplay() {
+            countDisplay.textContent = currentCount;
+            hiddenInput.value = currentCount;
+
+            // Disable buttons at limits
+            decreaseBtn.disabled = currentCount <= 1;
+            increaseBtn.disabled = currentCount >= maxPassengers;
+        }
+
+        decreaseBtn.addEventListener('click', () => {
+            if (currentCount > 1) {
+                currentCount--;
+                updateDisplay();
+            }
+        });
+
+        increaseBtn.addEventListener('click', () => {
+            if (currentCount < maxPassengers) {
+                currentCount++;
+                updateDisplay();
+            }
+        });
+
+        updateDisplay();
+    </script>
+{% endblock %}

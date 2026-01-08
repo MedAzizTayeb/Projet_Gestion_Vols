@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter des Passagers - AeroManager{% endblock %}
+
+{% block body %}
+    <style>
+        .passenger-form {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        .passenger-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+    </style>
+
+    <div class="container py-4">
+        <h1 class="mb-4">
+            <i class="fas fa-users text-primary"></i> Ajouter les Passagers
+        </h1>
+
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle"></i>
+            <strong>Réservation:</strong> {{ reservation.reference }} |
+            <strong>Vol:</strong> {{ reservation.vol.numVol }} |
+            <strong>Passagers à ajouter:</strong> {{ passagersRestants }}
+        </div>
+
+        <form method="post">
+            {% for i in 1..passagersRestants %}
+                <div class="passenger-form">
+                    <div class="passenger-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user"></i> Passager {{ passagersExistants + i }}
+                        </h5>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nom *</label>
+                            <input type="text" class="form-control"
+                                   name="passagers[{{ i - 1 }}][nom]"
+                                   required placeholder="Nom de famille">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Prénom *</label>
+                            <input type="text" class="form-control"
+                                   name="passagers[{{ i - 1 }}][prenom]"
+                                   required placeholder="Prénom">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Numéro de Passeport</label>
+                            <input type="text" class="form-control"
+                                   name="passagers[{{ i - 1 }}][numPassport]"
+                                   placeholder="Ex: AB1234567">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nationalité</label>
+                            <input type="text" class="form-control"
+                                   name="passagers[{{ i - 1 }}][nationalite]"
+                                   placeholder="Ex: Tunisienne">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Date de Naissance</label>
+                            <input type="date" class="form-control"
+                                   name="passagers[{{ i - 1 }}][dateNaissance]"
+                                   max="{{ 'now'|date('Y-m-d') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Poids Bagages (kg)</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   name="passagers[{{ i - 1 }}][poidsBagages]"
+                                   value="20.00" min="0" max="50">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Besoins Spéciaux</label>
+                        <textarea class="form-control"
+                                  name="passagers[{{ i - 1 }}][besoinsSpeciaux]"
+                                  rows="2"
+                                  placeholder="Ex: Fauteuil roulant, Régime alimentaire..."></textarea>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Important:</strong> Assurez-vous que les informations correspondent aux documents d'identité des passagers.
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg flex-fill">
+                    <i class="fas fa-save"></i> Enregistrer les Passagers
+                </button>
+                <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}"
+                   class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

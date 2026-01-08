@@ -115,7 +115,7 @@ class ReservationController extends AbstractController
             ['DateRes' => 'DESC']
         );
 
-        return $this->render('reservation/mes_reservations.html.twig', [
+        return $this->render('client/reservations.html.twig', [
             'reservations' => $reservations,
         ]);
     }

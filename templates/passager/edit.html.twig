@@ -1,13 +1,68 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Passager{% endblock %}
+{% block title %}Modifier Passager - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Edit Passager</h1>
+    <div class="container py-4">
+        <h1 class="mb-4">
+            <i class="fas fa-edit text-warning"></i> Modifier le Passager
+        </h1>
 
-    {{ include('passager/_form.html.twig', {'button_label': 'Update'}) }}
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Numéro de Passeport *</label>
+                            <input type="text" class="form-control"
+                                   name="numPassport"
+                                   value="{{ passager.numPassport }}"
+                                   required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nationalité *</label>
+                            <input type="text" class="form-control"
+                                   name="nationalite"
+                                   value="{{ passager.nationalite }}"
+                                   required>
+                        </div>
+                    </div>
 
-    <a href="{{ path('app_passager_index') }}">back to list</a>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Date de Naissance *</label>
+                            <input type="date" class="form-control"
+                                   name="dateNaissance"
+                                   value="{{ passager.dateNaissance|date('Y-m-d') }}"
+                                   required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Poids Bagages (kg)</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   name="poidsBagages"
+                                   value="{{ passager.poidsBagages }}"
+                                   min="0" max="50">
+                        </div>
+                    </div>
 
-    {{ include('passager/_delete_form.html.twig') }}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Besoins Spéciaux</label>
+                        <textarea class="form-control"
+                                  name="besoinsSpeciaux"
+                                  rows="3">{{ passager.besoinsSpeciaux }}</textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg flex-fill">
+                            <i class="fas fa-save"></i> Enregistrer les Modifications
+                        </button>
+                        <a href="{{ path('app_passager_list', {'reservationId': passager.reservation.id}) }}"
+                           class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}

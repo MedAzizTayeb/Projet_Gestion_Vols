@@ -16,6 +16,12 @@ class Passager
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 100)]
+    private ?string $nom = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $prenom = null;
+
     #[ORM\Column(length: 50)]
     private ?string $numPassport = null;
 
@@ -31,9 +37,9 @@ class Passager
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $poidsBagages = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'passagers')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?reservation $reservation = null;
+    private ?Reservation $reservation = null;
 
     /**
      * @var Collection<int, Ticket>
@@ -51,6 +57,28 @@ class Passager
         return $this->id;
     }
 
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+        return $this;
+    }
+
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+
+    public function setPrenom(string $prenom): static
+    {
+        $this->prenom = $prenom;
+        return $this;
+    }
+
     public function getNumPassport(): ?string
     {
         return $this->numPassport;
@@ -59,7 +87,6 @@ class Passager
     public function setNumPassport(string $numPassport): static
     {
         $this->numPassport = $numPassport;
-
         return $this;
     }
 
@@ -71,7 +98,6 @@ class Passager
     public function setNationalite(string $nationalite): static
     {
         $this->nationalite = $nationalite;
-
         return $this;
     }
 
@@ -83,7 +109,6 @@ class Passager
     public function setDateNaissance(\DateTime $dateNaissance): static
     {
         $this->dateNaissance = $dateNaissance;
-
         return $this;
     }
 
@@ -95,7 +120,6 @@ class Passager
     public function setBesoinsSpeciaux(?string $besoinsSpeciaux): static
     {
         $this->besoinsSpeciaux = $besoinsSpeciaux;
-
         return $this;
     }
 
@@ -107,19 +131,17 @@ class Passager
     public function setPoidsBagages(string $poidsBagages): static
     {
         $this->poidsBagages = $poidsBagages;
-
         return $this;
     }
 
-    public function getReservation(): ?reservation
+    public function getReservation(): ?Reservation
     {
         return $this->reservation;
     }
 
-    public function setReservation(?reservation $reservation): static
+    public function setReservation(?Reservation $reservation): static
     {
         $this->reservation = $reservation;
-
         return $this;
     }
 
@@ -137,19 +159,26 @@ class Passager
             $this->tickets->add($ticket);
             $ticket->setPassager($this);
         }
-
         return $this;
     }
 
     public function removeTicket(Ticket $ticket): static
     {
         if ($this->tickets->removeElement($ticket)) {
-            // set the owning side to null (unless already changed)
             if ($ticket->getPassager() === $this) {
                 $ticket->setPassager(null);
             }
         }
-
         return $this;
+    }
+
+    public function getNomComplet(): string
+    {
+        return $this->prenom . ' ' . $this->nom;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getNomComplet();
     }
 }

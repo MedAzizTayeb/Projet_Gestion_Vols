@@ -1,43 +1,110 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Passager index{% endblock %}
+{% block title %}Gestion des Passagers - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Passager index</h1>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-user text-primary"></i> Gestion des Passagers
+            </h1>
+            <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au Dashboard
+            </a>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>NumPassport</th>
-                <th>Nationalite</th>
-                <th>DateNaissance</th>
-                <th>BesoinsSpeciaux</th>
-                <th>PoidsBagages</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for passager in passagers %}
-            <tr>
-                <td>{{ passager.id }}</td>
-                <td>{{ passager.numPassport }}</td>
-                <td>{{ passager.nationalite }}</td>
-                <td>{{ passager.dateNaissance ? passager.dateNaissance|date('Y-m-d') : '' }}</td>
-                <td>{{ passager.besoinsSpeciaux }}</td>
-                <td>{{ passager.poidsBagages }}</td>
-                <td>
-                    <a href="{{ path('app_passager_show', {'id': passager.id}) }}">show</a>
-                    <a href="{{ path('app_passager_edit', {'id': passager.id}) }}">edit</a>
-                </td>
-            </tr>
+        {% if passagers is empty %}
+            <div class="card shadow">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-user fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                    <h3 class="text-muted">Aucun passager enregistré</h3>
+                    <p class="text-muted">Les passagers seront créés automatiquement lors des réservations.</p>
+                </div>
+            </div>
         {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Liste des Passagers
+                        <span class="badge bg-light text-primary">{{ passagers|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Numéro Passeport</th>
+                                <th>Nationalité</th>
+                                <th>Date de Naissance</th>
+                                <th>Réservation</th>
+                                <th>Vol</th>
+                                <th>Bagages (kg)</th>
+                                <th>Besoins Spéciaux</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for passager in passagers %}
+                                <tr>
+                                    <td><strong>{{ passager.id }}</strong></td>
+                                    <td>
+                                        <i class="fas fa-passport text-info"></i>
+                                        {{ passager.numPassport }}
+                                    </td>
+                                    <td>{{ passager.nationalite }}</td>
+                                    <td>{{ passager.dateNaissance|date('d/m/Y') }}</td>
+                                    <td>
+                                        {% if passager.reservation %}
+                                            <a href="{{ path('app_reservation_show', {'id': passager.reservation.id}) }}"
+                                               class="badge bg-info text-decoration-none">
+                                                {{ passager.reservation.reference }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if passager.reservation and passager.reservation.vol %}
+                                            <strong>{{ passager.reservation.vol.numVol }}</strong><br>
+                                            <small class="text-muted">
+                                                {{ passager.reservation.vol.depart.codeIATA }} →
+                                                {{ passager.reservation.vol.arrivee.codeIATA }}
+                                            </small>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ passager.poidsBagages }} kg</span>
+                                    </td>
+                                    <td>
+                                        {% if passager.besoinsSpeciaux %}
+                                            <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-exclamation-triangle"></i> Oui
+                                                </span>
+                                            <br>
+                                            <small class="text-muted">{{ passager.besoinsSpeciaux }}</small>
+                                        {% else %}
+                                            <span class="text-muted">Aucun</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 
-    <a href="{{ path('app_passager_new') }}">Create new</a>
+    <style>
+        .badge {
+            font-size: 0.85em;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
 {% endblock %}
