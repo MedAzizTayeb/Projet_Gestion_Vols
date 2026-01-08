@@ -21,7 +21,7 @@ class Ticket
     private ?string $numero = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $dateCreation = null;
+    private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\Column(length: 255)]
     private ?string $pdfPath = null;
@@ -65,12 +65,12 @@ class Ticket
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTime
+    public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTime $dateCreation): static
+    public function setDateCreation(\DateTimeInterface $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
 

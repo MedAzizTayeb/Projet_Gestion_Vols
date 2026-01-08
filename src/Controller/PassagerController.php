@@ -55,7 +55,8 @@ class PassagerController extends AbstractController
         $passagersExistants = $entityManager->getRepository(Passager::class)
             ->findBy(['reservation' => $reservation]);
 
-        $passagersRestants = $nbPassagers - count($passagersExistants);
+        // FIXED: Add null check
+        $passagersRestants = $nbPassagers - count($passagersExistants ?? []);
 
         if ($passagersRestants <= 0) {
             $this->addFlash('warning', 'Tous les passagers ont déjà été ajoutés');

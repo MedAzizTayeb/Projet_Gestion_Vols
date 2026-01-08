@@ -19,7 +19,7 @@ class Reservation
     private ?string $Reference = null;
 
     #[ORM\Column]
-    private ?\DateTime $DateRes = null;
+    private ?\DateTimeInterface $DateRes = null;
 
     #[ORM\Column(length: 50)]
     private ?string $Satut = null;
@@ -34,6 +34,12 @@ class Reservation
     private ?Vol $vol = null;
 
     /**
+     * @var Collection
+     */
+    #[ORM\OneToMany(targetEntity: Passager::class, mappedBy: 'reservation', cascade: ['remove'])]
+    private Collection $passagers;
+
+    /**
      * @var Collection<int, Ticket>
      */
     #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'reservation')]
@@ -42,6 +48,7 @@ class Reservation
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
+        $this->passagers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -61,12 +68,12 @@ class Reservation
         return $this;
     }
 
-    public function getDateRes(): ?\DateTime
+    public function getDateRes(): ?\DateTimeInterface
     {
         return $this->DateRes;
     }
 
-    public function setDateRes(\DateTime $DateRes): static
+    public function setDateRes(\DateTimeInterface $DateRes): static
     {
         $this->DateRes = $DateRes;
 
@@ -160,4 +167,31 @@ class Reservation
 
         return $this;
     }
+    /**
+     * @return Collection
+     */
+    public function getPassagers(): Collection
+    {
+        return $this->passagers;
+    }
+
+    public function addPassager(Passager $passager): static
+    {
+        if (!$this->passagers->contains($passager)) {
+            $this->passagers->add($passager);
+            $passager->setReservation($this);
+        }
+        return $this;
+    }
+
+    public function removePassager(Passager $passager): static
+    {
+        if ($this->passagers->removeElement($passager)) {
+            if ($passager->getReservation() === $this) {
+                $passager->setReservation(null);
+            }
+        }
+        return $this;
+    }
 }
+

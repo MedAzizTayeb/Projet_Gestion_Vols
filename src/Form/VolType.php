@@ -16,6 +16,8 @@ use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class VolType extends AbstractType
 {
@@ -170,6 +172,30 @@ class VolType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Vol::class,
+            'constraints' => [
+                new Callback([$this, 'validateVol']),
+            ],
         ]);
+    }
+
+    public function validateVol(Vol $vol, ExecutionContextInterface $context): void
+    {
+        // Validate that arrival is after departure
+        if ($vol->getDateArrive() && $vol->getDateDepart()) {
+            if ($vol->getDateArrive() <= $vol->getDateDepart()) {
+                $context->buildViolation('La date d\'arrivée doit être après la date de départ')
+                    ->atPath('DateArrive')
+                    ->addViolation();
+            }
+        }
+
+        // Validate that departure and arrival airports are different
+        if ($vol->getDepart() && $vol->getArrivee()) {
+            if ($vol->getDepart()->getId() === $vol->getArrivee()->getId()) {
+                $context->buildViolation('L\'aéroport d\'arrivée doit être différent de l\'aéroport de départ')
+                    ->atPath('arrivee')
+                    ->addViolation();
+            }
+        }
     }
 }

@@ -44,12 +44,22 @@ class PaiementController extends AbstractController
             return $this->redirectToRoute('app_reservation_show', ['id' => $reservation->getId()]);
         }
 
-        // Calculer le montant basé sur le nombre de passagers
+        // FIXED: Get passenger count from actual data, not session
         $nbPassagers = $request->getSession()->get('reservation_nb_passagers_' . $reservation->getId(), 1);
+
+        // SECURITY: Verify passenger count matches actual passengers if any exist
+        $actualPassengers = count($reservation->getPassagers());
+        if ($actualPassengers > 0) {
+            $nbPassagers = $actualPassengers; // Use actual count
+        }
+
         $prixParBillet = 150.00; // Prix par défaut - peut être configuré
         $montantTotal = $prixParBillet * $nbPassagers;
 
         if ($request->isMethod('POST')) {
+            // Start transaction for data integrity
+            $entityManager->beginTransaction();
+
             try {
                 $method = $request->request->get('method', 'Carte Bancaire');
 
@@ -63,7 +73,7 @@ class PaiementController extends AbstractController
                 $paiement = new Paiement();
                 $paiement->setMontant(number_format($montantTotal, 2, '.', ''));
                 $paiement->setMethod($method);
-                $paiement->setStatut('confirmé');
+                $paiement->setSatut('confirmé');
                 $paiement->setReservation($reservation);
 
                 $entityManager->persist($paiement);
@@ -85,6 +95,7 @@ class PaiementController extends AbstractController
                 }
 
                 $entityManager->flush();
+                $entityManager->commit(); // Commit transaction
 
                 // Nettoyer la session
                 $request->getSession()->remove('reservation_nb_passagers_' . $reservation->getId());
@@ -94,6 +105,7 @@ class PaiementController extends AbstractController
                 return $this->redirectToRoute('app_paiement_success', ['id' => $paiement->getId()]);
 
             } catch (\Exception $e) {
+                $entityManager->rollback(); // Rollback on error
                 $this->addFlash('error', 'Erreur lors du paiement : ' . $e->getMessage());
             }
         }

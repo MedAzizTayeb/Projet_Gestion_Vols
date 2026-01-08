@@ -120,4 +120,8 @@ class Aeroport
 
         return $this;
     }
+    public function __toString(): string
+    {
+        return $this->codeIATA . ' - ' . $this->ville . ', ' . $this->pays;
+    }
 }

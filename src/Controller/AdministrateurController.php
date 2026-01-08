@@ -34,12 +34,23 @@ class AdministrateurController extends AbstractController
         ClientRepository $clientRepository,
         TicketRepository $ticketRepository
     ): Response {
+        // FIXED: Query for today's flights
+        $today = new \DateTime('today');
+        $tomorrow = new \DateTime('tomorrow');
+
+        $volsAujourdhui = $volRepository->createQueryBuilder('v')
+            ->select('COUNT(v.id)')
+            ->where('v.DateDepart >= :today')
+            ->andWhere('v.DateDepart < :tomorrow')
+            ->setParameter('today', $today)
+            ->setParameter('tomorrow', $tomorrow)
+            ->getQuery()
+            ->getSingleScalarResult();
+
         // Statistiques générales
         $stats = [
             'total_vols' => $volRepository->count([]),
-            'vols_aujourdhui' => $volRepository->count([
-                'DateDepart' => new \DateTime('today')
-            ]),
+            'vols_aujourdhui' => $volsAujourdhui, // FIXED
             'total_avions' => $avionRepository->count([]),
             'avions_disponibles' => $avionRepository->count(['disponibilite' => true]),
             'total_aeroports' => $aeroportRepository->count([]),
