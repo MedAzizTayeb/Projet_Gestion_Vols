@@ -154,7 +154,7 @@
                             <h3 class="mb-0 text-warning">
                                 {% set uniqueReservations = [] %}
                                 {% for ticket in tickets %}
-                                    {% if ticket.reservation and ticket.reservation.satut == 'confirmé' %}
+                                    {% if ticket.reservation and ticket.reservation.statut == 'confirmé' %}
                                         {% set uniqueReservations = uniqueReservations|merge([ticket.reservation.id]) %}
                                     {% endif %}
                                 {% endfor %}
@@ -214,12 +214,12 @@
                                             <div>
                                                 <strong class="font-monospace">{{ ticket.reservation.reference }}</strong>
                                                 <div class="small">
-                                                    {% if ticket.reservation.satut == 'confirmé' %}
+                                                    {% if ticket.reservation.statut == 'confirmé' %}
                                                         <span class="badge bg-success">Confirmé</span>
-                                                    {% elseif ticket.reservation.satut == 'annulé' %}
+                                                    {% elseif ticket.reservation.statut == 'annulé' %}
                                                         <span class="badge bg-danger">Annulé</span>
                                                     {% else %}
-                                                        <span class="badge bg-warning text-dark">{{ ticket.reservation.satut|capitalize }}</span>
+                                                        <span class="badge bg-warning text-dark">{{ ticket.reservation.statut|capitalize }}</span>
                                                     {% endif %}
                                                 </div>
                                             </div>

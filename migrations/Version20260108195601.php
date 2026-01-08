@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260108180313 extends AbstractMigration
+final class Version20260108195601 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -25,9 +25,8 @@ final class Version20260108180313 extends AbstractMigration
         $this->addSql('ALTER TABLE categorie_avion CHANGE compagnie compagnie VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE client CHANGE telephone telephone VARCHAR(20) DEFAULT NULL');
         $this->addSql('ALTER TABLE passager CHANGE besoins_speciaux besoins_speciaux VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE reservation CHANGE date_res date_res VARCHAR(255) NOT NULL');
         $this->addSql('ALTER TABLE utilisateur CHANGE roles roles JSON NOT NULL, CHANGE date_creation date_creation DATETIME DEFAULT NULL');
-        $this->addSql('ALTER TABLE vol CHANGE date_depart date_depart VARCHAR(255) NOT NULL, CHANGE date_arrive date_arrive VARCHAR(255) NOT NULL, CHANGE escale escale VARCHAR(255) DEFAULT NULL, CHANGE statut statut VARCHAR(50) DEFAULT NULL');
+        $this->addSql('ALTER TABLE vol CHANGE escale escale VARCHAR(255) DEFAULT NULL, CHANGE statut statut VARCHAR(50) DEFAULT NULL');
         $this->addSql('ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT NULL');
     }
 
@@ -40,8 +39,7 @@ final class Version20260108180313 extends AbstractMigration
         $this->addSql('ALTER TABLE client CHANGE telephone telephone VARCHAR(20) DEFAULT \'NULL\'');
         $this->addSql('ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT \'NULL\'');
         $this->addSql('ALTER TABLE passager CHANGE besoins_speciaux besoins_speciaux VARCHAR(255) DEFAULT \'NULL\'');
-        $this->addSql('ALTER TABLE reservation CHANGE date_res date_res DATETIME NOT NULL');
         $this->addSql('ALTER TABLE utilisateur CHANGE roles roles LONGTEXT NOT NULL COLLATE `utf8mb4_bin`, CHANGE date_creation date_creation DATETIME DEFAULT \'NULL\'');
-        $this->addSql('ALTER TABLE vol CHANGE date_depart date_depart DATETIME NOT NULL, CHANGE date_arrive date_arrive DATETIME NOT NULL, CHANGE escale escale VARCHAR(255) DEFAULT \'NULL\', CHANGE statut statut VARCHAR(50) DEFAULT \'NULL\'');
+        $this->addSql('ALTER TABLE vol CHANGE escale escale VARCHAR(255) DEFAULT \'NULL\', CHANGE statut statut VARCHAR(50) DEFAULT \'NULL\'');
     }
 }

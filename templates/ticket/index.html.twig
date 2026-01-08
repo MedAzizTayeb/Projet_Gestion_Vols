@@ -154,7 +154,7 @@
                             <h4 class="mb-0">
                                 {% set validTickets = 0 %}
                                 {% for ticket in tickets %}
-                                    {% if ticket.reservation.satut == 'confirmé' %}
+                                    {% if ticket.reservation.statut == 'confirmé' %}
                                         {% set validTickets = validTickets + 1 %}
                                     {% endif %}
                                 {% endfor %}
@@ -188,11 +188,11 @@
                     <div class="col-lg-6">
                         <div class="ticket-card">
                             <div class="ticket-header">
-                                {% if ticket.reservation.satut == 'confirmé' %}
+                                {% if ticket.reservation.statut == 'confirmé' %}
                                     <span class="ticket-status bg-success text-white">
                                         <i class="fas fa-check"></i> Valide
                                     </span>
-                                {% elseif ticket.reservation.satut == 'annulé' %}
+                                {% elseif ticket.reservation.statut == 'annulé' %}
                                     <span class="ticket-status bg-danger text-white">
                                         <i class="fas fa-times"></i> Annulé
                                     </span>

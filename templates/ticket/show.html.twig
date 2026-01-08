@@ -214,13 +214,13 @@
         {% endfor %}
 
         {# Status Banner #}
-        {% if ticket.reservation.satut == 'confirmé' %}
+        {% if ticket.reservation.statut == 'confirmé' %}
             <div class="status-banner status-valid">
                 <i class="fas fa-check-circle fa-2x mb-2"></i>
                 <h4>Billet Valide</h4>
                 <p class="mb-0">Votre billet est confirmé et prêt à être utilisé</p>
             </div>
-        {% elseif ticket.reservation.satut == 'annulé' %}
+        {% elseif ticket.reservation.statut == 'annulé' %}
             <div class="status-banner status-cancelled">
                 <i class="fas fa-times-circle fa-2x mb-2"></i>
                 <h4>Billet Annulé</h4>

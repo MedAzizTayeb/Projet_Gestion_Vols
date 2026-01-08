@@ -291,14 +291,14 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if reservation.satut == 'confirmé' %}
+                                        {% if reservation.statut == 'confirmé' %}
                                             <span class="badge bg-success">Confirmé</span>
-                                        {% elseif reservation.satut == 'en attente' %}
+                                        {% elseif reservation.statut == 'en attente' %}
                                             <span class="badge bg-warning">En attente</span>
-                                        {% elseif reservation.satut == 'annulé' %}
+                                        {% elseif reservation.statut == 'annulé' %}
                                             <span class="badge bg-danger">Annulé</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">{{ reservation.satut }}</span>
+                                            <span class="badge bg-secondary">{{ reservation.statut }}</span>
                                         {% endif %}
                                     </td>
                                     <td>

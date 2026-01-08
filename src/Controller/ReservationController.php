@@ -59,7 +59,7 @@ class ReservationController extends AbstractController
             $reservation = new Reservation();
             $reservation->setReference('RES-' . strtoupper(uniqid()));
             $reservation->setDateRes(new \DateTime());
-            $reservation->setSatut('en attente');
+            $reservation->setStatut('en attente');
             $reservation->setClient($client);
             $reservation->setVol($vol);
 

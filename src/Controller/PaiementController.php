@@ -74,13 +74,13 @@ class PaiementController extends AbstractController
                 $paiement = new Paiement();
                 $paiement->setMontant(number_format($montantTotal, 2, '.', ''));
                 $paiement->setMethod($method);
-                $paiement->setSatut('confirmé');
+                $paiement->setStatut('confirmé');
                 $paiement->setReservation($reservation);
 
                 $entityManager->persist($paiement);
 
                 // Mettre à jour le statut de la réservation
-                $reservation->setSatut('confirmé');
+                $reservation->setStatut('confirmé');
 
                 // Générer les tickets automatiquement
                 for ($i = 1; $i <= $nbPassagers; $i++) {
@@ -171,7 +171,7 @@ class PaiementController extends AbstractController
 
                 // Annuler la réservation associée
                 $reservation = $paiement->getReservation();
-                $reservation->setSatut('annulé');
+                $reservation->setStatut('annulé');
 
                 // Remettre les places disponibles
                 $vol = $reservation->getVol();

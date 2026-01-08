@@ -308,12 +308,12 @@
                                             </td>
                                             <td><small>{{ reservation.dateRes|date('d/m/Y H:i') }}</small></td>
                                             <td>
-                                                {% if reservation.satut == 'confirmé' %}
+                                                {% if reservation.statut == 'confirmé' %}
                                                     <span class="badge bg-success">Confirmé</span>
-                                                {% elseif reservation.satut == 'en attente' %}
+                                                {% elseif reservation.statut == 'en attente' %}
                                                     <span class="badge bg-warning">En attente</span>
                                                 {% else %}
-                                                    <span class="badge bg-secondary">{{ reservation.satut }}</span>
+                                                    <span class="badge bg-secondary">{{ reservation.statut }}</span>
                                                 {% endif %}
                                             </td>
                                         </tr>

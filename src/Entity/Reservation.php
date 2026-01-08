@@ -21,8 +21,9 @@ class Reservation
     #[ORM\Column]
     private ?\DateTime $DateRes = null;
 
+    // CORRECTION: La propriété doit être $Statut (pas $Satut)
     #[ORM\Column(length: 50)]
-    private ?string $Satut = null;
+    private ?string $Statut = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     private ?Client $client = null;
@@ -80,14 +81,15 @@ class Reservation
         return $this;
     }
 
-    public function getSatut(): ?string
+
+    public function getStatut(): ?string
     {
-        return $this->Satut;
+        return $this->Statut;
     }
 
-    public function setSatut(string $Satut): static
+    public function setStatut(string $Statut): static
     {
-        $this->Satut = $Satut;
+        $this->Statut = $Statut;
 
         return $this;
     }
@@ -167,6 +169,7 @@ class Reservation
 
         return $this;
     }
+
     /**
      * @return Collection
      */
@@ -194,4 +197,3 @@ class Reservation
         return $this;
     }
 }
-

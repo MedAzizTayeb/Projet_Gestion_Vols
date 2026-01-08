@@ -55,7 +55,7 @@ class AdministrateurController extends AbstractController
             'avions_disponibles' => $avionRepository->count(['disponibilite' => true]),
             'total_aeroports' => $aeroportRepository->count([]),
             'total_reservations' => $reservationRepository->count([]),
-            'reservations_confirmees' => $reservationRepository->count(['Satut' => 'confirmé']),
+            'reservations_confirmees' => $reservationRepository->count(['Statut' => 'confirmé']),
             'total_clients' => $clientRepository->count([]),
             'total_tickets' => $ticketRepository->count([]),
         ];
@@ -191,7 +191,7 @@ class AdministrateurController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('valider'.$reservation->getId(), $request->getPayload()->getString('_token'))) {
-            $reservation->setSatut('confirmé');
+            $reservation->setStatut('confirmé');
             $entityManager->flush();
 
             $this->addFlash('success', 'Réservation validée avec succès !');
@@ -211,7 +211,7 @@ class AdministrateurController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('annuler'.$reservation->getId(), $request->getPayload()->getString('_token'))) {
-            $reservation->setSatut('annulé');
+            $reservation->setStatut('annulé');
             $entityManager->flush();
 
             $this->addFlash('success', 'Réservation annulée avec succès !');

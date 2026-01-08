@@ -20,8 +20,8 @@ class Paiement
     #[ORM\Column(length: 255)]
     private ?string $method = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $statut = null;
+    #[ORM\Column(name: 'statut', length: 255)]
+    private ?string $Statut = null;
 
     #[ORM\OneToOne(inversedBy: 'paiement', cascade: ['persist', 'remove'])]
     private ?Reservation $reservation = null;
@@ -57,12 +57,12 @@ class Paiement
 
     public function getStatut(): ?string
     {
-        return $this->statut;
+        return $this->Statut;
     }
 
-    public function setStatut(string $statut): static
+    public function setStatut(string $Statut): static
     {
-        $this->statut = $statut;
+        $this->Statut = $Statut;
 
         return $this;
     }

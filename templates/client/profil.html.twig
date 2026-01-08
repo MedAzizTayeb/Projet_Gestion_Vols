@@ -79,7 +79,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <div class="border rounded p-3">
-                                    {% set confirmed = client.reservations|filter(r => r.satut == 'confirmé')|length %}
+                                    {% set confirmed = client.reservations|filter(r => r.statut == 'confirmé')|length %}
                                     <div class="h2 text-success mb-0">{{ confirmed }}</div>
                                     <small class="text-muted">Confirmées</small>
                                 </div>

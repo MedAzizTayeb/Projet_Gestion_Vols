@@ -186,7 +186,7 @@
                     <div class="info-row">
                         <span class="info-label">Référence</span>
                         <span class="info-value">
-                            <a href="{{ path('app_reservation_show', {'id': paiement.reservation.id}) }}"
+                            <a href="{{ path('app_admin_reservations_show', {'id': paiement.reservation.id}) }}"
                                class="badge bg-primary text-decoration-none">
                                 {{ paiement.reservation.reference }}
                             </a>
@@ -196,12 +196,12 @@
                     <div class="info-row">
                         <span class="info-label">Statut Réservation</span>
                         <span class="info-value">
-                            {% if paiement.reservation.satut == 'confirmé' %}
+                            {% if paiement.reservation.statut == 'confirmé' %}
                                 <span class="badge bg-success">Confirmé</span>
-                            {% elseif paiement.reservation.satut == 'annulé' %}
+                            {% elseif paiement.reservation.statut == 'annulé' %}
                                 <span class="badge bg-danger">Annulé</span>
                             {% else %}
-                                <span class="badge bg-warning text-dark">{{ paiement.reservation.satut|capitalize }}</span>
+                                <span class="badge bg-warning text-dark">{{ paiement.reservation.statut|capitalize }}</span>
                             {% endif %}
                         </span>
                     </div>
@@ -233,39 +233,39 @@
                         <div class="info-row">
                             <span class="info-label">Numéro de Vol</span>
                             <span class="info-value">
-                            <strong>{{ paiement.reservation.vol.numVol }}</strong>
-                        </span>
+                                <strong>{{ paiement.reservation.vol.numVol }}</strong>
+                            </span>
                         </div>
 
                         <div class="info-row">
                             <span class="info-label">Départ</span>
                             <span class="info-value">
-                            <strong>{{ paiement.reservation.vol.depart.ville }}</strong>
-                            ({{ paiement.reservation.vol.depart.codeIATA }})
-                            <div class="small text-muted">
-                                {{ paiement.reservation.vol.dateDepart|date('d/m/Y à H:i') }}
-                            </div>
-                        </span>
+                                <strong>{{ paiement.reservation.vol.depart.ville }}</strong>
+                                ({{ paiement.reservation.vol.depart.codeIATA }})
+                                <div class="small text-muted">
+                                    {{ paiement.reservation.vol.dateDepart|date('d/m/Y à H:i') }}
+                                </div>
+                            </span>
                         </div>
 
                         <div class="info-row">
                             <span class="info-label">Arrivée</span>
                             <span class="info-value">
-                            <strong>{{ paiement.reservation.vol.arrivee.ville }}</strong>
-                            ({{ paiement.reservation.vol.arrivee.codeIATA }})
-                            <div class="small text-muted">
-                                {{ paiement.reservation.vol.dateArrive|date('d/m/Y à H:i') }}
-                            </div>
-                        </span>
+                                <strong>{{ paiement.reservation.vol.arrivee.ville }}</strong>
+                                ({{ paiement.reservation.vol.arrivee.codeIATA }})
+                                <div class="small text-muted">
+                                    {{ paiement.reservation.vol.dateArrive|date('d/m/Y à H:i') }}
+                                </div>
+                            </span>
                         </div>
 
                         {% if paiement.reservation.vol.avion %}
                             <div class="info-row">
                                 <span class="info-label">Avion</span>
                                 <span class="info-value">
-                                {{ paiement.reservation.vol.avion.modele }}
-                                <div class="small text-muted">{{ paiement.reservation.vol.avion.immatriculation }}</div>
-                            </span>
+                                    {{ paiement.reservation.vol.avion.modele }}
+                                    <div class="small text-muted">{{ paiement.reservation.vol.avion.immatriculation }}</div>
+                                </span>
                             </div>
                         {% endif %}
                     </div>
@@ -282,25 +282,25 @@
                         <div class="info-row">
                             <span class="info-label">Nom Complet</span>
                             <span class="info-value">
-                <strong>{{ user.nom }} {{ user.prenom }}</strong>
-            </span>
+                                <strong>{{ user.nom }} {{ user.prenom }}</strong>
+                            </span>
                         </div>
 
                         <div class="info-row">
                             <span class="info-label">Email</span>
                             <span class="info-value">
-                <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-            </span>
+                                <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                            </span>
                         </div>
 
                         {% if paiement.reservation.client.telephone %}
                             <div class="info-row">
                                 <span class="info-label">Téléphone</span>
                                 <span class="info-value">
-                    <a href="tel:{{ paiement.reservation.client.telephone }}">
-                        {{ paiement.reservation.client.telephone }}
-                    </a>
-                </span>
+                                    <a href="tel:{{ paiement.reservation.client.telephone }}">
+                                        {{ paiement.reservation.client.telephone }}
+                                    </a>
+                                </span>
                             </div>
                         {% endif %}
                     </div>
@@ -329,7 +329,8 @@
                         </div>
                     {% endif %}
 
-                    <a href="{{ path('app_reservation_show', {'id': paiement.reservation.id}) }}"
+                    {# BOUTON CORRIGÉ ICI #}
+                    <a href="{{ path('app_admin_reservations_show', {'id': paiement.reservation.id}) }}"
                        class="btn btn-info w-100 mb-2">
                         <i class="fas fa-eye"></i> Voir la réservation
                     </a>
@@ -478,8 +479,8 @@
                                     </div>
                                     <div class="col-md-6">
                                         <strong>Client :</strong><br>
-                                        {{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}<br>
-                                        <small class="text-muted">{{ paiement.reservation.client.email }}</small>
+                                        {{ paiement.reservation.client.user.nom }} {{ paiement.reservation.client.user.prenom }}<br>
+                                        <small class="text-muted">{{ paiement.reservation.client.user.email }}</small>
                                     </div>
                                 </div>
                                 <hr>
