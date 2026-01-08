@@ -47,7 +47,7 @@ class AdminAeroportController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_admin_aeroports_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_admin_aeroports_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Aeroport $aeroport): Response
     {
         return $this->render('administrateur/aeroports/show.html.twig', [
@@ -55,7 +55,7 @@ class AdminAeroportController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_admin_aeroports_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_admin_aeroports_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(Request $request, Aeroport $aeroport, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(AeroportType::class, $aeroport);
@@ -74,7 +74,7 @@ class AdminAeroportController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_admin_aeroports_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'app_admin_aeroports_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, Aeroport $aeroport, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$aeroport->getId(), $request->getPayload()->getString('_token'))) {

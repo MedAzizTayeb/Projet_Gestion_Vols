@@ -1,34 +1,186 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reservation{% endblock %}
+{% block title %}Réservation {{ reservation.reference }} - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Reservation</h1>
+    <style>
+        .reservation-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ reservation.id }}</td>
-            </tr>
-            <tr>
-                <th>Reference</th>
-                <td>{{ reservation.Reference }}</td>
-            </tr>
-            <tr>
-                <th>DateRes</th>
-                <td>{{ reservation.DateRes ? reservation.DateRes|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Satut</th>
-                <td>{{ reservation.Satut }}</td>
-            </tr>
-        </tbody>
-    </table>
+        .success-icon {
+            font-size: 4rem;
+            animation: bounce 1s ease-in-out;
+        }
 
-    <a href="{{ path('app_reservation_index') }}">back to list</a>
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
 
-    <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}">edit</a>
+        .info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
 
-    {{ include('reservation/_delete_form.html.twig') }}
+        .status-badge {
+            font-size: 1.2rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+        }
+    </style>
+
+    <div class="reservation-header">
+        <div class="container text-center">
+            <div class="success-icon mb-3">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Réservation Confirmée !</h1>
+            <p class="mb-0 opacity-75">Référence: {{ reservation.reference }}</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Statut -->
+                <div class="info-section text-center">
+                    <h4 class="mb-3">Statut de votre réservation</h4>
+                    {% if reservation.satut == 'confirmé' %}
+                        <span class="status-badge badge bg-success">
+                        <i class="fas fa-check-circle"></i> Confirmée
+                    </span>
+                    {% elseif reservation.satut == 'en attente' %}
+                        <span class="status-badge badge bg-warning text-dark">
+                        <i class="fas fa-clock"></i> En attente de paiement
+                    </span>
+                    {% elseif reservation.satut == 'annulé' %}
+                        <span class="status-badge badge bg-danger">
+                        <i class="fas fa-times-circle"></i> Annulée
+                    </span>
+                    {% else %}
+                        <span class="status-badge badge bg-secondary">
+                        {{ reservation.satut }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Informations de vol -->
+                {% if reservation.vol %}
+                    <div class="info-section">
+                        <h4 class="mb-4">
+                            <i class="fas fa-plane"></i> Détails du Vol
+                        </h4>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Numéro de vol</label>
+                                    <div class="h5">{{ reservation.vol.numVol }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Date de départ</label>
+                                    <div class="h5">{{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Itinéraire</label>
+                                    <div class="h5">
+                                        {{ reservation.vol.depart.codeIATA }}
+                                        <i class="fas fa-arrow-right text-muted mx-2"></i>
+                                        {{ reservation.vol.arrivee.codeIATA }}
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ reservation.vol.depart.ville }} → {{ reservation.vol.arrivee.ville }}
+                                    </small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Porte d'embarquement</label>
+                                    <div class="h5">{{ reservation.vol.port }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if reservation.vol.escale %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Escale(s):</strong> {{ reservation.vol.escale }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Informations de réservation -->
+                <div class="info-section">
+                    <h4 class="mb-4">
+                        <i class="fas fa-file-alt"></i> Informations de Réservation
+                    </h4>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Référence</label>
+                            <div class="h5 font-monospace">{{ reservation.reference }}</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Date de réservation</label>
+                            <div class="h5">{{ reservation.dateRes|date('d/m/Y à H:i') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="info-section">
+                    {% if reservation.satut == 'en attente' %}
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Action requise:</strong> Votre réservation est en attente. Veuillez procéder au paiement pour la confirmer.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_paiement_new', {'reservationId': reservation.id}) }}"
+                               class="btn btn-success btn-lg">
+                                <i class="fas fa-credit-card"></i> Procéder au Paiement
+                            </a>
+                        </div>
+                    {% elseif reservation.satut == 'confirmé' %}
+                        <div class="alert alert-success mb-3">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Réservation confirmée!</strong> Vous recevrez vos billets par email sous peu.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_client_tickets') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-ticket-alt"></i> Voir mes Billets
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2 mt-2">
+                        <a href="{{ path('app_mes_reservations') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list"></i> Mes Réservations
+                        </a>
+                        <a href="{{ path('app_client_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home"></i> Retour au Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Important info -->
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle"></i> Informations Importantes</h6>
+                    <ul class="mb-0">
+                        <li>Présentez-vous à l'aéroport au moins 2 heures avant le départ</li>
+                        <li>Munissez-vous d'une pièce d'identité valide</li>
+                        <li>Consultez les restrictions de bagages</li>
+                        <li>Gardez votre référence de réservation: <strong>{{ reservation.reference }}</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

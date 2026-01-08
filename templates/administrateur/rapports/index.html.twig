@@ -1,0 +1,291 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapports et Statistiques - AeroManager{% endblock %}
+
+{% block body %}
+    <style>
+        .stats-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            overflow: hidden;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+    </style>
+
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-chart-bar text-success"></i> Rapports et Statistiques</h1>
+                <p class="text-muted">Vue d'ensemble des performances</p>
+            </div>
+            <div>
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistiques principales -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card card border-left-primary" style="border-left: 4px solid #667eea;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-primary fw-bold small mb-1">VOLS AUJOURD'HUI</div>
+                                <div class="h2 mb-0 fw-bold">{{ rapports.vols_aujourdhui }}</div>
+                                <div class="small text-muted mt-2">
+                                    <i class="fas fa-plane"></i> En opération
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-plane-departure fa-2x text-primary" style="opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card card border-left-success" style="border-left: 4px solid #1cc88a;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-success fw-bold small mb-1">RÉSERVATIONS CE MOIS</div>
+                                <div class="h2 mb-0 fw-bold">{{ rapports.reservations_mois }}</div>
+                                <div class="small text-muted mt-2">
+                                    <i class="fas fa-calendar"></i> Depuis le {{ 'first day of this month'|date('d/m') }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clipboard-list fa-2x text-success" style="opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card card border-left-info" style="border-left: 4px solid #36b9cc;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-info fw-bold small mb-1">TICKETS CETTE ANNÉE</div>
+                                <div class="h2 mb-0 fw-bold">{{ rapports.tickets_annee }}</div>
+                                <div class="small text-muted mt-2">
+                                    <i class="fas fa-ticket-alt"></i> Depuis janvier {{ 'now'|date('Y') }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-ticket-alt fa-2x text-info" style="opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card card border-left-warning" style="border-left: 4px solid #f6c23e;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-warning fw-bold small mb-1">TAUX DE REMPLISSAGE</div>
+                                <div class="h2 mb-0 fw-bold">75%</div>
+                                <div class="small text-muted mt-2">
+                                    <i class="fas fa-chart-line"></i> Moyenne mensuelle
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-percentage fa-2x text-warning" style="opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques simulés -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-4"><i class="fas fa-chart-line text-primary"></i> Évolution des Réservations</h5>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Graphique:</strong> Évolution du nombre de réservations sur les 6 derniers mois
+                    </div>
+                    <div class="row text-center mt-4">
+                        <div class="col-4">
+                            <div class="border rounded p-3">
+                                <div class="h4 text-primary">125</div>
+                                <small class="text-muted">Mois dernier</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-3">
+                                <div class="h4 text-success">{{ rapports.reservations_mois }}</div>
+                                <small class="text-muted">Ce mois</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-3">
+                                <div class="h4 text-info">+15%</div>
+                                <small class="text-muted">Croissance</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-4"><i class="fas fa-chart-pie text-success"></i> Répartition des Statuts</h5>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Graphique:</strong> Distribution des réservations par statut
+                    </div>
+                    <div class="row text-center mt-4">
+                        <div class="col-4">
+                            <div class="border rounded p-3">
+                                <div class="h4 text-success">65%</div>
+                                <small class="text-muted">Confirmées</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-3">
+                                <div class="h4 text-warning">25%</div>
+                                <small class="text-muted">En attente</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-3">
+                                <div class="h4 text-danger">10%</div>
+                                <small class="text-muted">Annulées</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableaux de bord -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-4"><i class="fas fa-plane text-primary"></i> Top 5 Destinations</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Destination</th>
+                                <th>Vols</th>
+                                <th>Réservations</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><strong>Paris (CDG)</strong></td>
+                                <td>45</td>
+                                <td><span class="badge bg-success">320</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Londres (LHR)</strong></td>
+                                <td>38</td>
+                                <td><span class="badge bg-success">285</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>New York (JFK)</strong></td>
+                                <td>25</td>
+                                <td><span class="badge bg-success">198</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dubaï (DXB)</strong></td>
+                                <td>20</td>
+                                <td><span class="badge bg-success">156</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tokyo (NRT)</strong></td>
+                                <td>15</td>
+                                <td><span class="badge bg-success">112</span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-4"><i class="fas fa-dollar-sign text-success"></i> Revenus Estimés</h5>
+                    <div class="alert alert-success mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Revenus ce mois:</span>
+                            <strong class="h4 mb-0">€ 547,500</strong>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="h5 text-primary">€ 450,000</div>
+                                <small class="text-muted">Mois dernier</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="h5 text-info">€ 5.2M</div>
+                                <small class="text-muted">Cette année</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success" style="width: 75%">
+                            75% de l'objectif annuel
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions Rapides</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ path('app_admin_vols_index') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-plane"></i><br>Voir Tous les Vols
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ path('app_admin_reservations_index') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-clipboard-list"></i><br>Gérer Réservations
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ path('app_admin_clients_index') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-users"></i><br>Voir Clients
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-tachometer-alt"></i><br>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

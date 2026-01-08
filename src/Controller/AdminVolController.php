@@ -50,7 +50,7 @@ class AdminVolController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_admin_vols_show', methods: ['GET'], priority: 2)]
+    #[Route('/{id}', name: 'app_admin_vols_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Vol $vol): Response
     {
         return $this->render('administrateur/vols/show.html.twig', [
@@ -58,7 +58,7 @@ class AdminVolController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_admin_vols_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_admin_vols_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(Request $request, Vol $vol, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(VolType::class, $vol);
@@ -77,7 +77,7 @@ class AdminVolController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_admin_vols_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'app_admin_vols_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, Vol $vol, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$vol->getId(), $request->getPayload()->getString('_token'))) {

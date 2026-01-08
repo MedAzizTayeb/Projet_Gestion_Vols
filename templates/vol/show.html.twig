@@ -1,46 +1,240 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Vol{% endblock %}
+{% block title %}Vol {{ vol.numVol }} - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Vol</h1>
+    <style>
+        .flight-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ vol.id }}</td>
-            </tr>
-            <tr>
-                <th>NumVol</th>
-                <td>{{ vol.NumVol }}</td>
-            </tr>
-            <tr>
-                <th>DateDepart</th>
-                <td>{{ vol.DateDepart ? vol.DateDepart|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>DateArrive</th>
-                <td>{{ vol.DateArrive ? vol.DateArrive|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Port</th>
-                <td>{{ vol.port }}</td>
-            </tr>
-            <tr>
-                <th>Escale</th>
-                <td>{{ vol.escale }}</td>
-            </tr>
-            <tr>
-                <th>PlacesDisponibles</th>
-                <td>{{ vol.placesDisponibles }}</td>
-            </tr>
-        </tbody>
-    </table>
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
 
-    <a href="{{ path('app_vol_index') }}">back to list</a>
+        .route-visual {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
 
-    <a href="{{ path('app_vol_edit', {'id': vol.id}) }}">edit</a>
+        .airport-large {
+            text-align: center;
+        }
 
-    {{ include('vol/_delete_form.html.twig') }}
+        .airport-code-large {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            font-family: monospace;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .timeline-icon {
+            width: 50px;
+            height: 50px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+    </style>
+
+    <div class="flight-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-plane"></i> Vol {{ vol.numVol }}</h1>
+                    <p class="mb-0 opacity-75">{{ vol.depart.ville }} → {{ vol.arrivee.ville }}</p>
+                </div>
+                <a href="{{ path('app_vol_index') }}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Retour aux vols
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Route principale -->
+                <div class="info-card">
+                    <h4 class="mb-4"><i class="fas fa-route"></i> Itinéraire</h4>
+
+                    <div class="route-visual">
+                        <div class="airport-large">
+                            <div class="airport-code-large">{{ vol.depart.codeIATA }}</div>
+                            <div class="h5 mt-2">{{ vol.depart.ville }}</div>
+                            <div class="text-muted">{{ vol.depart.nom }}</div>
+                            <div class="text-muted small">{{ vol.depart.pays }}</div>
+                        </div>
+
+                        <div class="text-center">
+                            <i class="fas fa-plane fa-3x text-primary"></i>
+                            <div class="mt-2 text-muted">
+                                {% if vol.escale %}
+                                    <small><i class="fas fa-exchange-alt"></i> Avec escale</small>
+                                {% else %}
+                                    <small>Vol direct</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="airport-large">
+                            <div class="airport-code-large">{{ vol.arrivee.codeIATA }}</div>
+                            <div class="h5 mt-2">{{ vol.arrivee.ville }}</div>
+                            <div class="text-muted">{{ vol.arrivee.nom }}</div>
+                            <div class="text-muted small">{{ vol.arrivee.pays }}</div>
+                        </div>
+                    </div>
+
+                    {% if vol.escale %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Escale(s):</strong> {{ vol.escale }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Détails du vol -->
+                <div class="info-card">
+                    <h4 class="mb-4"><i class="fas fa-info-circle"></i> Détails du Vol</h4>
+
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Date de départ</div>
+                                <div class="h5 text-primary mb-0">{{ vol.dateDepart|date('d/m/Y') }}</div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="fas fa-plane-departure"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Heure de départ</div>
+                                <div class="h5 text-primary mb-0">{{ vol.dateDepart|date('H:i') }}</div>
+                                <small class="text-muted">Porte {{ vol.port }}</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="fas fa-plane-arrival"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Heure d'arrivée prévue</div>
+                                <div class="h5 text-primary mb-0">{{ vol.dateArrive|date('H:i') }}</div>
+                            </div>
+                        </div>
+
+                        {% if vol.avion %}
+                            <div class="timeline-item">
+                                <div class="timeline-icon">
+                                    <i class="fas fa-plane"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Avion</div>
+                                    <div class="h5 text-primary mb-0">{{ vol.avion.modele }}</div>
+                                    <small class="text-muted">
+                                        Capacité: {{ vol.avion.capacite }} passagers
+                                        {% if vol.avion.immatriculation %}
+                                            | {{ vol.avion.immatriculation }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Réservation -->
+                <div class="info-card sticky-top" style="top: 20px;">
+                    <h4 class="mb-4"><i class="fas fa-ticket-alt"></i> Réservation</h4>
+
+                    <div class="text-center mb-4">
+                        <div class="display-4 text-primary mb-2">
+                            <i class="fas fa-chair"></i>
+                        </div>
+                        <div class="h2 text-primary">{{ vol.placesDisponibles }}</div>
+                        <div class="text-muted">places disponibles</div>
+                    </div>
+
+                    <div class="border-top pt-3 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Statut:</span>
+                            <strong>
+                                <span class="badge bg-success">{{ vol.statut|default('Disponible') }}</span>
+                            </strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tarif:</span>
+                            <strong class="text-primary">À confirmer</strong>
+                        </div>
+                    </div>
+
+                    {% if vol.placesDisponibles > 0 %}
+                        {% if app.user %}
+                            <a href="{{ path('app_reservation_create', {'volId': vol.id}) }}"
+                               class="btn btn-primary w-100 btn-lg mb-2">
+                                <i class="fas fa-ticket-alt"></i> Réserver ce vol
+                            </a>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="btn btn-primary w-100 btn-lg mb-2">
+                                <i class="fas fa-sign-in-alt"></i> Connexion pour réserver
+                            </a>
+                            <div class="text-center">
+                                <small class="text-muted">
+                                    Pas encore de compte ?
+                                    <a href="{{ path('app_register') }}">S'inscrire</a>
+                                </small>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <button class="btn btn-secondary w-100 btn-lg" disabled>
+                            <i class="fas fa-times"></i> Complet
+                        </button>
+                    {% endif %}
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Important:</strong> Arrivez au moins 2 heures avant le départ
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

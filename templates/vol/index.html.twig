@@ -1,45 +1,247 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Vol index{% endblock %}
+{% block title %}Rechercher un Vol - AeroManager{% endblock %}
 
 {% block body %}
-    <h1>Vol index</h1>
+    <style>
+        .search-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>NumVol</th>
-                <th>DateDepart</th>
-                <th>DateArrive</th>
-                <th>Port</th>
-                <th>Escale</th>
-                <th>PlacesDisponibles</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for vol in vols %}
-            <tr>
-                <td>{{ vol.id }}</td>
-                <td>{{ vol.NumVol }}</td>
-                <td>{{ vol.DateDepart ? vol.DateDepart|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ vol.DateArrive ? vol.DateArrive|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ vol.port }}</td>
-                <td>{{ vol.escale }}</td>
-                <td>{{ vol.placesDisponibles }}</td>
-                <td>
-                    <a href="{{ path('app_vol_show', {'id': vol.id}) }}">show</a>
-                    <a href="{{ path('app_vol_edit', {'id': vol.id}) }}">edit</a>
-                </td>
-            </tr>
+        .search-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .vol-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+
+        .vol-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .flight-route {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .airport-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .airport-code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            font-family: monospace;
+        }
+
+        .airport-city {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .flight-arrow {
+            font-size: 2rem;
+            color: #999;
+            margin: 0 1rem;
+        }
+
+        .price-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+
+    <div class="search-section">
+        <div class="container">
+            <h1 class="text-center mb-4">
+                <i class="fas fa-search"></i> Rechercher un Vol
+            </h1>
+
+            <div class="search-card">
+                <form method="get" action="{{ path('app_vol_index') }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-plane-departure"></i> Départ
+                            </label>
+                            <select name="depart" class="form-select">
+                                <option value="">Tous les aéroports</option>
+                                {% for aeroport in aeroports %}
+                                    <option value="{{ aeroport.id }}" {% if filters.depart == aeroport.id %}selected{% endif %}>
+                                        {{ aeroport.codeIATA }} - {{ aeroport.ville }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-plane-arrival"></i> Arrivée
+                            </label>
+                            <select name="arrivee" class="form-select">
+                                <option value="">Tous les aéroports</option>
+                                {% for aeroport in aeroports %}
+                                    <option value="{{ aeroport.id }}" {% if filters.arrivee == aeroport.id %}selected{% endif %}>
+                                        {{ aeroport.codeIATA }} - {{ aeroport.ville }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-calendar"></i> Date de départ
+                            </label>
+                            <input type="date" name="date_depart" class="form-control"
+                                   value="{{ filters.date_depart }}"
+                                   min="{{ 'now'|date('Y-m-d') }}">
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="fas fa-search"></i> Rechercher
+                        </button>
+                        <a href="{{ path('app_vol_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo"></i> Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        {% if vols is empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-plane-slash fa-5x text-muted mb-3" style="opacity: 0.3;"></i>
+                <h3 class="text-muted">Aucun vol disponible</h3>
+                <p class="text-muted">
+                    {% if filters.depart or filters.arrivee or filters.date_depart %}
+                        Essayez de modifier vos critères de recherche
+                    {% else %}
+                        Il n'y a actuellement aucun vol disponible. Revenez bientôt !
+                    {% endif %}
+                </p>
+            </div>
         {% else %}
-            <tr>
-                <td colspan="8">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <div class="mb-4">
+                <h4>
+                    <i class="fas fa-list"></i>
+                    {{ vols|length }} vol(s) disponible(s)
+                </h4>
+            </div>
 
-    <a href="{{ path('app_vol_new') }}">Create new</a>
+            {% for vol in vols %}
+                <div class="vol-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="mb-1">
+                                <i class="fas fa-plane"></i> Vol {{ vol.numVol }}
+                            </h5>
+                            <small class="text-muted">
+                                {% if vol.avion %}
+                                    {{ vol.avion.modele }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        <span class="badge bg-info">
+                        <i class="fas fa-chair"></i> {{ vol.placesDisponibles }} places
+                    </span>
+                    </div>
+
+                    <div class="flight-route">
+                        <div class="airport-box">
+                            <div class="airport-code">{{ vol.depart.codeIATA }}</div>
+                            <div class="airport-city">{{ vol.depart.ville }}</div>
+                            <div class="text-muted small">{{ vol.depart.pays }}</div>
+                        </div>
+
+                        <div class="flight-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+
+                        <div class="airport-box">
+                            <div class="airport-code">{{ vol.arrivee.codeIATA }}</div>
+                            <div class="airport-city">{{ vol.arrivee.ville }}</div>
+                            <div class="text-muted small">{{ vol.arrivee.pays }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <div class="text-muted small">Date de départ</div>
+                            <strong><i class="fas fa-calendar"></i> {{ vol.dateDepart|date('d/m/Y') }}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">Heure de départ</div>
+                            <strong><i class="fas fa-clock"></i> {{ vol.dateDepart|date('H:i') }}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">Heure d'arrivée</div>
+                            <strong><i class="fas fa-clock"></i> {{ vol.dateArrive|date('H:i') }}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-muted small">Porte</div>
+                            <strong><i class="fas fa-door-open"></i> {{ vol.port }}</strong>
+                        </div>
+                    </div>
+
+                    {% if vol.escale %}
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Escale(s):</strong> {{ vol.escale }}
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="price-badge">
+                            <i class="fas fa-tag"></i> Prix à confirmer
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('app_vol_show', {'id': vol.id}) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-info-circle"></i> Détails
+                            </a>
+                            {% if app.user %}
+                                <a href="{{ path('app_reservation_create', {'volId': vol.id}) }}" class="btn btn-primary">
+                                    <i class="fas fa-ticket-alt"></i> Réserver
+                                </a>
+                            {% else %}
+                                <a href="{{ path('app_login') }}" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt"></i> Connexion pour réserver
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 {% endblock %}

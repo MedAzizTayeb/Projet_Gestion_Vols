@@ -3,14 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Administrateur;
-use App\Entity\Vol;
-use App\Entity\Avion;
-use App\Entity\Aeroport;
-use App\Entity\Reservation;
-use App\Entity\Client;
 use App\Form\AdministrateurType;
-use App\Form\VolType;
-use App\Form\AvionType;
 use App\Repository\AdministrateurRepository;
 use App\Repository\VolRepository;
 use App\Repository\AvionRepository;
@@ -110,7 +103,7 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
-    #[Route('/administrateur/{id}', name: 'app_administrateur_show', methods: ['GET'])]
+    #[Route('/administrateur/{id}', name: 'app_administrateur_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Administrateur $administrateur): Response
     {
         return $this->render('administrateur/show.html.twig', [
@@ -118,7 +111,7 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
-    #[Route('/administrateur/{id}/edit', name: 'app_administrateur_edit', methods: ['GET', 'POST'])]
+    #[Route('/administrateur/{id}/edit', name: 'app_administrateur_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(
         Request $request,
         Administrateur $administrateur,
@@ -151,7 +144,7 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
-    #[Route('/administrateur/{id}', name: 'app_administrateur_delete', methods: ['POST'])]
+    #[Route('/administrateur/{id}/delete', name: 'app_administrateur_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, Administrateur $administrateur, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$administrateur->getId(), $request->getPayload()->getString('_token'))) {
@@ -166,154 +159,6 @@ class AdministrateurController extends AbstractController
         return $this->redirectToRoute('app_administrateur_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    // ==================== GESTION DES VOLS ====================
-
-    #[Route('/vols', name: 'app_admin_vols_index', methods: ['GET'])]
-    public function volsIndex(VolRepository $volRepository): Response
-    {
-        return $this->render('administrateur/vols/index.html.twig', [
-            'vols' => $volRepository->findAll(),
-        ]);
-    }
-
-    #[Route('/vols/new', name: 'app_admin_vols_new', methods: ['GET', 'POST'])]
-    public function volsNew(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $vol = new Vol();
-        $form = $this->createForm(VolType::class, $vol);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Associer l'administrateur qui crée le vol
-            $vol->setCreePar($this->getUser());
-
-            $entityManager->persist($vol);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Vol créé avec succès !');
-            return $this->redirectToRoute('app_admin_vols_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('administrateur/vols/new.html.twig', [
-            'vol' => $vol,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/vols/{id}', name: 'app_admin_vols_show', methods: ['GET'], priority: 2)]
-    public function volsShow(Vol $vol): Response
-    {
-        return $this->render('administrateur/vols/show.html.twig', [
-            'vol' => $vol,
-        ]);
-    }
-
-    #[Route('/vols/{id}/edit', name: 'app_admin_vols_edit', methods: ['GET', 'POST'])]
-    public function volsEdit(Request $request, Vol $vol, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(VolType::class, $vol);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Vol modifié avec succès !');
-            return $this->redirectToRoute('app_admin_vols_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('administrateur/vols/edit.html.twig', [
-            'vol' => $vol,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/vols/{id}', name: 'app_admin_vols_delete', methods: ['POST'])]
-    public function volsDelete(Request $request, Vol $vol, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$vol->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($vol);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Vol supprimé avec succès !');
-        }
-
-        return $this->redirectToRoute('app_admin_vols_index', [], Response::HTTP_SEE_OTHER);
-    }
-
-    // ==================== GESTION DES AVIONS ====================
-
-    #[Route('/avions', name: 'app_admin_avions_index', methods: ['GET'])]
-    public function avionsIndex(AvionRepository $avionRepository): Response
-    {
-        return $this->render('administrateur/avions/index.html.twig', [
-            'avions' => $avionRepository->findAll(),
-        ]);
-    }
-
-    #[Route('/avions/new', name: 'app_admin_avions_new', methods: ['GET', 'POST'])]
-    public function avionsNew(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $avion = new Avion();
-        $form = $this->createForm(AvionType::class, $avion);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Associer l'administrateur qui gère l'avion
-            $avion->setGerePar($this->getUser());
-
-            $entityManager->persist($avion);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Avion créé avec succès !');
-            return $this->redirectToRoute('app_admin_avions_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('administrateur/avions/new.html.twig', [
-            'avion' => $avion,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/avions/{id}', name: 'app_admin_avions_show', methods: ['GET'])]
-    public function avionsShow(Avion $avion): Response
-    {
-        return $this->render('administrateur/avions/show.html.twig', [
-            'avion' => $avion,
-        ]);
-    }
-
-    #[Route('/avions/{id}/edit', name: 'app_admin_avions_edit', methods: ['GET', 'POST'])]
-    public function avionsEdit(Request $request, Avion $avion, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(AvionType::class, $avion);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Avion modifié avec succès !');
-            return $this->redirectToRoute('app_admin_avions_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('administrateur/avions/edit.html.twig', [
-            'avion' => $avion,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/avions/{id}', name: 'app_admin_avions_delete', methods: ['POST'])]
-    public function avionsDelete(Request $request, Avion $avion, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$avion->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($avion);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Avion supprimé avec succès !');
-        }
-
-        return $this->redirectToRoute('app_admin_avions_index', [], Response::HTTP_SEE_OTHER);
-    }
-
     // ==================== GESTION DES RÉSERVATIONS ====================
 
     #[Route('/reservations', name: 'app_admin_reservations_index', methods: ['GET'])]
@@ -324,9 +169,16 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
-    #[Route('/reservations/{id}/valider', name: 'app_admin_reservations_valider', methods: ['POST'])]
-    public function reservationsValider(Request $request, Reservation $reservation, EntityManagerInterface $entityManager): Response
+    #[Route('/reservations/{id}/valider', name: 'app_admin_reservations_valider', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function reservationsValider(Request $request, ReservationRepository $reservationRepository, EntityManagerInterface $entityManager, int $id): Response
     {
+        $reservation = $reservationRepository->find($id);
+
+        if (!$reservation) {
+            $this->addFlash('error', 'Réservation introuvable');
+            return $this->redirectToRoute('app_admin_reservations_index');
+        }
+
         if ($this->isCsrfTokenValid('valider'.$reservation->getId(), $request->getPayload()->getString('_token'))) {
             $reservation->setSatut('confirmé');
             $entityManager->flush();
@@ -337,9 +189,16 @@ class AdministrateurController extends AbstractController
         return $this->redirectToRoute('app_admin_reservations_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/reservations/{id}/annuler', name: 'app_admin_reservations_annuler', methods: ['POST'])]
-    public function reservationsAnnuler(Request $request, Reservation $reservation, EntityManagerInterface $entityManager): Response
+    #[Route('/reservations/{id}/annuler', name: 'app_admin_reservations_annuler', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function reservationsAnnuler(Request $request, ReservationRepository $reservationRepository, EntityManagerInterface $entityManager, int $id): Response
     {
+        $reservation = $reservationRepository->find($id);
+
+        if (!$reservation) {
+            $this->addFlash('error', 'Réservation introuvable');
+            return $this->redirectToRoute('app_admin_reservations_index');
+        }
+
         if ($this->isCsrfTokenValid('annuler'.$reservation->getId(), $request->getPayload()->getString('_token'))) {
             $reservation->setSatut('annulé');
             $entityManager->flush();
@@ -360,9 +219,16 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
-    #[Route('/clients/{id}', name: 'app_admin_clients_show', methods: ['GET'])]
-    public function clientsShow(Client $client): Response
+    #[Route('/clients/{id}', name: 'app_admin_clients_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function clientsShow(ClientRepository $clientRepository, int $id): Response
     {
+        $client = $clientRepository->find($id);
+
+        if (!$client) {
+            $this->addFlash('error', 'Client introuvable');
+            return $this->redirectToRoute('app_admin_clients_index');
+        }
+
         return $this->render('administrateur/clients/show.html.twig', [
             'client' => $client,
         ]);

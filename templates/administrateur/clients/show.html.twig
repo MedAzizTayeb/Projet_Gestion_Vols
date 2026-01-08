@@ -1,0 +1,183 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Client - AeroManager{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="mb-4">
+            <a href="{{ path('app_admin_clients_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="row">
+            <!-- Informations client -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-user"></i> Informations Client</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="display-1 text-info">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                        </div>
+
+                        {% if client.user %}
+                            <h4 class="text-center mb-4">{{ client.user.nomComplet }}</h4>
+
+                            <div class="mb-3">
+                                <label class="text-muted small">Email</label>
+                                <div>
+                                    <i class="fas fa-envelope text-info"></i>
+                                    <strong>{{ client.user.email }}</strong>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Téléphone</label>
+                            <div>
+                                <i class="fas fa-phone text-info"></i>
+                                <strong>{{ client.telephone ?: 'Non renseigné' }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small">Date d'inscription</label>
+                            <div>
+                                <i class="fas fa-calendar text-info"></i>
+                                <strong>{{ client.dateInscription|date('d/m/Y') }}</strong>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border rounded p-2">
+                                    <div class="h4 text-primary mb-0">{{ client.reservations|length }}</div>
+                                    <small class="text-muted">Réservations</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2">
+                                    {% set confirmed = client.reservations|filter(r => r.satut == 'confirmé')|length %}
+                                    <div class="h4 text-success mb-0">{{ confirmed }}</div>
+                                    <small class="text-muted">Confirmées</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Réservations du client -->
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clipboard-list"></i>
+                            Historique des Réservations
+                            <span class="badge bg-light text-success">{{ client.reservations|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if client.reservations is empty %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3" style="opacity: 0.3;"></i>
+                                <p class="text-muted">Aucune réservation</p>
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Référence</th>
+                                        <th>Vol</th>
+                                        <th>Date Réservation</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for reservation in client.reservations %}
+                                        <tr>
+                                            <td>
+                                                <strong class="font-monospace">{{ reservation.reference }}</strong>
+                                            </td>
+                                            <td>
+                                                {% if reservation.vol %}
+                                                    <strong>{{ reservation.vol.numVol }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        {{ reservation.vol.depart.codeIATA }} →
+                                                        {{ reservation.vol.arrivee.codeIATA }}
+                                                        <br>
+                                                        {{ reservation.vol.dateDepart|date('d/m/Y H:i') }}
+                                                    </small>
+                                                {% else %}
+                                                    <span class="text-muted">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>{{ reservation.dateRes|date('d/m/Y H:i') }}</small>
+                                            </td>
+                                            <td>
+                                                {% if reservation.satut == 'confirmé' %}
+                                                    <span class="badge bg-success">Confirmé</span>
+                                                {% elseif reservation.satut == 'en attente' %}
+                                                    <span class="badge bg-warning text-dark">En attente</span>
+                                                {% elseif reservation.satut == 'annulé' %}
+                                                    <span class="badge bg-danger">Annulé</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ reservation.satut }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Statistiques détaillées -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set pending = client.reservations|filter(r => r.satut == 'en attente')|length %}
+                                    <h3 class="text-warning mb-0">{{ pending }}</h3>
+                                    <small class="text-muted">En attente</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set cancelled = client.reservations|filter(r => r.satut == 'annulé')|length %}
+                                    <h3 class="text-danger mb-0">{{ cancelled }}</h3>
+                                    <small class="text-muted">Annulées</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3">
+                                    {% set tickets_count = 0 %}
+                                    {% for reservation in client.reservations %}
+                                        {% set tickets_count = tickets_count + reservation.tickets|length %}
+                                    {% endfor %}
+                                    <h3 class="text-info mb-0">{{ tickets_count }}</h3>
+                                    <small class="text-muted">Tickets générés</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -83,10 +83,6 @@ class VolType extends AbstractType
                     new NotBlank([
                         'message' => 'La date de départ est requise',
                     ]),
-                    new GreaterThan([
-                        'value' => 'now',
-                        'message' => 'La date de départ doit être dans le futur',
-                    ]),
                 ],
                 'help' => 'Date et heure de départ en temps local',
             ])
