@@ -229,10 +229,15 @@
                                     </td>
                                     <td>
                                         {% if ticket.reservation and ticket.reservation.client %}
-                                            <div>
-                                                <strong>{{ ticket.reservation.client.nom }} {{ ticket.reservation.client.prenom }}</strong>
-                                                <div class="small text-muted">{{ ticket.reservation.client.email }}</div>
-                                            </div>
+                                            {% set user = ticket.reservation.client.user %}
+                                            {% if user %}
+                                                <div>
+                                                    <strong>{{ user.nom }} {{ user.prenom }}</strong>
+                                                    <div class="small text-muted">{{ user.email }}</div>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
                                         {% else %}
                                             <span class="text-muted">N/A</span>
                                         {% endif %}

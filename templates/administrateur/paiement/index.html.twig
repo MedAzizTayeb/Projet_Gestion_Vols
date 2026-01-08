@@ -251,9 +251,10 @@
                                     </td>
                                     <td>
                                         {% if paiement.reservation.client %}
+                                            {% set user = paiement.reservation.client.user %}
                                             <div>
-                                                <strong>{{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}</strong>
-                                                <div class="small text-muted">{{ paiement.reservation.client.email }}</div>
+                                                <strong>{{ user.nom }} {{ user.prenom }}</strong>
+                                                <div class="small text-muted">{{ user.email }}</div>
                                             </div>
                                         {% else %}
                                             <span class="text-muted">N/A</span>

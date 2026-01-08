@@ -273,6 +273,7 @@
 
                 {# Client Information #}
                 {% if paiement.reservation.client %}
+                    {% set user = paiement.reservation.client.user %}
                     <div class="detail-card">
                         <h4 class="mb-4">
                             <i class="fas fa-user text-success"></i> Informations Client
@@ -281,34 +282,25 @@
                         <div class="info-row">
                             <span class="info-label">Nom Complet</span>
                             <span class="info-value">
-                            <strong>{{ paiement.reservation.client.nom }} {{ paiement.reservation.client.prenom }}</strong>
-                        </span>
+                <strong>{{ user.nom }} {{ user.prenom }}</strong>
+            </span>
                         </div>
 
                         <div class="info-row">
                             <span class="info-label">Email</span>
                             <span class="info-value">
-                            <a href="mailto:{{ paiement.reservation.client.email }}">
-                                {{ paiement.reservation.client.email }}
-                            </a>
-                        </span>
+                <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+            </span>
                         </div>
 
                         {% if paiement.reservation.client.telephone %}
                             <div class="info-row">
                                 <span class="info-label">Téléphone</span>
                                 <span class="info-value">
-                            <a href="tel:{{ paiement.reservation.client.telephone }}">
-                                {{ paiement.reservation.client.telephone }}
-                            </a>
-                        </span>
-                            </div>
-                        {% endif %}
-
-                        {% if paiement.reservation.client.adresse %}
-                            <div class="info-row">
-                                <span class="info-label">Adresse</span>
-                                <span class="info-value">{{ paiement.reservation.client.adresse }}</span>
+                    <a href="tel:{{ paiement.reservation.client.telephone }}">
+                        {{ paiement.reservation.client.telephone }}
+                    </a>
+                </span>
                             </div>
                         {% endif %}
                     </div>

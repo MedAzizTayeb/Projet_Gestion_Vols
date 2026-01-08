@@ -14,10 +14,11 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/paiement')]
-#[IsGranted('ROLE_USER')]
 class PaiementController extends AbstractController
 {
+    // Routes CLIENTS (nécessitent ROLE_USER)
     #[Route('/nouveau/{reservationId}', name: 'app_paiement_new', requirements: ['reservationId' => '\d+'], methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
     public function new(
         int $reservationId,
         Request $request,
@@ -119,6 +120,7 @@ class PaiementController extends AbstractController
     }
 
     #[Route('/succes/{id}', name: 'app_paiement_success', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function success(Paiement $paiement): Response
     {
         // Vérifier que le paiement appartient au client connecté
@@ -134,7 +136,8 @@ class PaiementController extends AbstractController
         ]);
     }
 
-    #[Route('/admin', name: 'app_paiement_index', methods: ['GET'])]
+    // Routes ADMIN (nécessitent ROLE_ADMIN)
+    #[Route('/admin/liste', name: 'app_paiement_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function index(PaiementRepository $paiementRepository): Response
     {
