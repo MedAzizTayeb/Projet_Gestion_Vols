@@ -1,302 +1,330 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Administrateurs - AeroManager</title>
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Administrateurs - AeroManager{% endblock %}
+
+{% block body %}
     <style>
-        * {
-            margin: 0;
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .admin-card:hover {
+            border-left-color: #667eea;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #333;
-            border: 2px solid #e0e0e0;
-        }
-
-        .btn-secondary:hover {
-            background: #e9ecef;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-        }
-
-        .btn-edit {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .btn-edit:hover {
-            background: #e0a800;
-            transform: translateY(-2px);
-        }
-
-        .btn-view {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-view:hover {
-            background: #138496;
-            transform: translateY(-2px);
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        thead th {
-            padding: 1rem;
-            text-align: left;
-            color: white;
-            font-weight: 600;
-            border: none;
-        }
-
-        thead th:first-child {
-            border-radius: 12px 0 0 0;
-        }
-
-        thead th:last-child {
-            border-radius: 0 12px 0 0;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid #e0e0e0;
-            transition: background 0.3s;
-        }
-
-        tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        tbody td {
-            padding: 1rem;
-            color: #333;
-        }
-
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn-small {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .badge-admin {
-            background: #667eea;
-            color: white;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .back-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateX(-5px);
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .actions {
-                flex-direction: column;
-            }
-
-            table {
-                font-size: 0.9rem;
-            }
-
-            tbody td {
-                padding: 0.7rem;
-            }
+            justify-content: center;
+            border-radius: 8px;
         }
     </style>
-</head>
-<body>
-<div class="container">
-    <a href="/" class="back-link">← Retour au tableau de bord</a>
 
-    <div class="header">
-        <h1>
-            <span>👨‍💼</span>
-            Gestion des Administrateurs
-        </h1>
-        <a href="{{ path('app_administrateur_new') }}" class="btn btn-primary">
-            ➕ Nouvel Administrateur
-        </a>
-    </div>
-
-    <div class="card">
-        <div class="table-container">
-            {% if administrateurs|length > 0 %}
-                <table>
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Matricule</th>
-                        <th>Niveau d'Accès</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for administrateur in administrateurs %}
-                        <tr>
-                            <td><strong>#{{ administrateur.id }}</strong></td>
-                            <td>{{ administrateur.matricule }}</td>
-                            <td>
-                                <span class="badge badge-admin">
-                                    Niveau {{ administrateur.niveauAcces }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="actions">
-                                    <a href="{{ path('app_administrateur_show', {'id': administrateur.id}) }}" class="btn btn-view btn-small">
-                                        👁️ Voir
-                                    </a>
-                                    <a href="{{ path('app_administrateur_edit', {'id': administrateur.id}) }}" class="btn btn-edit btn-small">
-                                        ✏️ Modifier
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">👨‍💼</div>
-                    <h3>Aucun administrateur trouvé</h3>
-                    <p>Commencez par créer votre premier administrateur</p>
-                    <a href="{{ path('app_administrateur_new') }}" class="btn btn-primary" style="margin-top: 1rem;">
-                        ➕ Créer un Administrateur
+    <div class="admin-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user-shield"></i> Gestion des Administrateurs</h1>
+                    <p class="mb-0 opacity-75">Gérez les comptes administrateurs du système</p>
+                </div>
+                <div>
+                    <a href="{{ path('app_administrateur_new') }}" class="btn btn-light me-2">
+                        <i class="fas fa-plus"></i> Nouvel Administrateur
+                    </a>
+                    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left"></i> Tableau de bord
                     </a>
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
-</div>
-</body>
-</html>
+
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# Statistics #}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">Total Administrateurs</div>
+                            <h3 class="mb-0">{{ administrateurs|length }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user-shield fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">Administrateurs Actifs</div>
+                            <h3 class="mb-0 text-success">
+                                {% set actifs = 0 %}
+                                {% for admin in administrateurs %}
+                                    {% if admin.actif %}
+                                        {% set actifs = actifs + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ actifs }}
+                            </h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">Départements</div>
+                            <h3 class="mb-0 text-info">
+                                {% set departements = [] %}
+                                {% for admin in administrateurs %}
+                                    {% if admin.departement and admin.departement not in departements %}
+                                        {% set departements = departements|merge([admin.departement]) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ departements|length }}
+                            </h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-building fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Administrators List #}
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Liste des Administrateurs</h5>
+                    <div class="input-group" style="max-width: 300px;">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Rechercher...">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if administrateurs|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="adminsTable">
+                            <thead class="bg-light">
+                            <tr>
+                                <th class="px-4">ID</th>
+                                <th>Matricule</th>
+                                <th>Nom Complet</th>
+                                <th>Email</th>
+                                <th>Département</th>
+                                <th>Niveau d'Accès</th>
+                                <th>Statut</th>
+                                <th>Date Création</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for administrateur in administrateurs %}
+                                <tr>
+                                    <td class="px-4">
+                                        <strong>#{{ administrateur.id }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary font-monospace">
+                                            {{ administrateur.matricule }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ administrateur.nomComplet }}</strong>
+                                            {% if administrateur.telephone %}
+                                                <div class="small text-muted">
+                                                    <i class="fas fa-phone"></i> {{ administrateur.telephone }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ administrateur.email }}</td>
+                                    <td>
+                                        {% if administrateur.departement %}
+                                            <span class="badge bg-info">{{ administrateur.departement }}</span>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            Niveau {{ administrateur.niveauAcces }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if administrateur.actif %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check"></i> Actif
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times"></i> Inactif
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <div>{{ administrateur.dateCreation|date('d/m/Y') }}</div>
+                                            {% if administrateur.dernierConnexion %}
+                                                <div class="text-muted">
+                                                    Dernière connexion:<br>
+                                                    {{ administrateur.dernierConnexion|date('d/m/Y H:i') }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_administrateur_show', {'id': administrateur.id}) }}"
+                                               class="action-btn btn btn-sm btn-info"
+                                               title="Voir détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_administrateur_edit', {'id': administrateur.id}) }}"
+                                               class="action-btn btn btn-sm btn-warning"
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="action-btn btn btn-sm btn-danger"
+                                                    title="Supprimer"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal{{ administrateur.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {# Delete Modal #}
+                                <div class="modal fade" id="deleteModal{{ administrateur.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-exclamation-triangle"></i> Confirmer la suppression
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Êtes-vous sûr de vouloir supprimer cet administrateur ?</p>
+                                                <div class="alert alert-warning">
+                                                    <strong>Attention :</strong> Cette action est irréversible !
+                                                </div>
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <strong>Matricule :</strong> {{ administrateur.matricule }}<br>
+                                                        <strong>Nom :</strong> {{ administrateur.nomComplet }}<br>
+                                                        <strong>Email :</strong> {{ administrateur.email }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Annuler
+                                                </button>
+                                                <form method="post" action="{{ path('app_administrateur_delete', {'id': administrateur.id}) }}" style="display: inline;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ administrateur.id) }}">
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="fas fa-trash"></i> Supprimer
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-shield fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun administrateur trouvé</h5>
+                        <p class="text-muted">Commencez par créer votre premier administrateur</p>
+                        <a href="{{ path('app_administrateur_new') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Créer un administrateur
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const table = document.getElementById('adminsTable');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        });
+
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+{% endblock %}

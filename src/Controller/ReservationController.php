@@ -69,12 +69,14 @@ class ReservationController extends AbstractController
             $entityManager->persist($reservation);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Réservation créée avec succès ! Référence: ' . $reservation->getReference());
-
             // Stocker le nombre de passagers en session pour le paiement
             $request->getSession()->set('reservation_nb_passagers_' . $reservation->getId(), $nbPassagers);
 
-            return $this->redirectToRoute('app_reservation_show', ['id' => $reservation->getId()]);
+            $this->addFlash('success', 'Réservation créée avec succès ! Référence: ' . $reservation->getReference());
+            $this->addFlash('info', 'Veuillez maintenant ajouter les informations des ' . $nbPassagers . ' passager(s)');
+
+            // Rediriger directement vers l'ajout des passagers
+            return $this->redirectToRoute('app_passager_add', ['reservationId' => $reservation->getId()]);
         }
 
         return $this->render('reservation/create.html.twig', [
@@ -98,7 +100,7 @@ class ReservationController extends AbstractController
         ]);
     }
 
-    #[Route('/mes-reservations', name: 'app_mes_reservations', methods: ['GET'])]
+    #[Route('/mes-reservations', name: 'app_client_reservations', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
     public function mesReservations(ReservationRepository $reservationRepository): Response
     {

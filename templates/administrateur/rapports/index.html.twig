@@ -22,13 +22,19 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
         }
+        .destination-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 30px;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
     </style>
 
     <div class="container-fluid py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1><i class="fas fa-chart-bar text-success"></i> Rapports et Statistiques</h1>
-                <p class="text-muted">Vue d'ensemble des performances</p>
+                <p class="text-muted">Vue d'ensemble des performances du système</p>
             </div>
             <div>
                 <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary">
@@ -101,14 +107,14 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col">
-                                <div class="text-warning fw-bold small mb-1">TAUX DE REMPLISSAGE</div>
-                                <div class="h2 mb-0 fw-bold">75%</div>
+                                <div class="text-warning fw-bold small mb-1">CLIENTS ACTIFS</div>
+                                <div class="h2 mb-0 fw-bold">{{ rapports.clients_actifs }}</div>
                                 <div class="small text-muted mt-2">
-                                    <i class="fas fa-chart-line"></i> Moyenne mensuelle
+                                    <i class="fas fa-users"></i> Sur {{ rapports.total_clients }} total
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fas fa-percentage fa-2x text-warning" style="opacity: 0.3;"></i>
+                                <i class="fas fa-users fa-2x text-warning" style="opacity: 0.3;"></i>
                             </div>
                         </div>
                     </div>
@@ -116,141 +122,141 @@
             </div>
         </div>
 
-        <!-- Graphiques simulés -->
+        <!-- Graphiques et analyses -->
         <div class="row">
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-8 mb-4">
                 <div class="chart-container">
-                    <h5 class="mb-4"><i class="fas fa-chart-line text-primary"></i> Évolution des Réservations</h5>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Graphique:</strong> Évolution du nombre de réservations sur les 6 derniers mois
-                    </div>
-                    <div class="row text-center mt-4">
+                    <h5 class="mb-4"><i class="fas fa-map-marked-alt text-primary"></i> Top 5 Destinations</h5>
+
+                    {% if rapports.top_destinations is not empty %}
+                        {% set maxReservations = rapports.top_destinations|first.totalReservations %}
+
+                        {% for destination in rapports.top_destinations %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div>
+                                        <strong>{{ destination.ville }}</strong>
+                                        <span class="badge bg-secondary ms-2">{{ destination.codeIATA }}</span>
+                                    </div>
+                                    <span class="badge bg-success">{{ destination.totalReservations }} réservations</span>
+                                </div>
+                                <div class="progress" style="height: 30px;">
+                                    <div class="destination-bar progress-bar"
+                                         role="progressbar"
+                                         style="width: {{ (destination.totalReservations / maxReservations * 100)|round }}%"
+                                         aria-valuenow="{{ destination.totalReservations }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="{{ maxReservations }}">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Aucune donnée de destination disponible pour le moment.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="chart-container">
+                    <h5 class="mb-4"><i class="fas fa-chart-line text-success"></i> Tendances Mensuelles</h5>
+                    <div class="row text-center">
                         <div class="col-4">
                             <div class="border rounded p-3">
-                                <div class="h4 text-primary">125</div>
-                                <small class="text-muted">Mois dernier</small>
+                                <div class="h4 text-primary">{{ rapports.vols_aujourdhui }}</div>
+                                <small class="text-muted">Vols Aujourd'hui</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="border rounded p-3">
                                 <div class="h4 text-success">{{ rapports.reservations_mois }}</div>
-                                <small class="text-muted">Ce mois</small>
+                                <small class="text-muted">Réservations Mois</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="border rounded p-3">
-                                <div class="h4 text-info">+15%</div>
-                                <small class="text-muted">Croissance</small>
+                                <div class="h4 text-info">{{ rapports.clients_actifs }}</div>
+                                <small class="text-muted">Clients Actifs</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success mt-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-arrow-up"></i>
+                                <strong>Performance:</strong>
+                                {% set croissance = ((rapports.reservations_mois / (rapports.total_clients > 0 ? rapports.total_clients : 1)) * 100)|round %}
+                                Taux d'activité de {{ croissance }}%
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-6 mb-4">
-                <div class="chart-container">
-                    <h5 class="mb-4"><i class="fas fa-chart-pie text-success"></i> Répartition des Statuts</h5>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Graphique:</strong> Distribution des réservations par statut
-                    </div>
-                    <div class="row text-center mt-4">
-                        <div class="col-4">
-                            <div class="border rounded p-3">
-                                <div class="h4 text-success">65%</div>
-                                <small class="text-muted">Confirmées</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border rounded p-3">
-                                <div class="h4 text-warning">25%</div>
-                                <small class="text-muted">En attente</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border rounded p-3">
-                                <div class="h4 text-danger">10%</div>
-                                <small class="text-muted">Annulées</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tableaux de bord -->
-        <div class="row">
-            <div class="col-lg-6 mb-4">
-                <div class="chart-container">
-                    <h5 class="mb-4"><i class="fas fa-plane text-primary"></i> Top 5 Destinations</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Destination</th>
-                                <th>Vols</th>
-                                <th>Réservations</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td><strong>Paris (CDG)</strong></td>
-                                <td>45</td>
-                                <td><span class="badge bg-success">320</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Londres (LHR)</strong></td>
-                                <td>38</td>
-                                <td><span class="badge bg-success">285</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>New York (JFK)</strong></td>
-                                <td>25</td>
-                                <td><span class="badge bg-success">198</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Dubaï (DXB)</strong></td>
-                                <td>20</td>
-                                <td><span class="badge bg-success">156</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tokyo (NRT)</strong></td>
-                                <td>15</td>
-                                <td><span class="badge bg-success">112</span></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-4 mb-4">
                 <div class="chart-container">
                     <h5 class="mb-4"><i class="fas fa-dollar-sign text-success"></i> Revenus Estimés</h5>
-                    <div class="alert alert-success mb-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>Revenus ce mois:</span>
-                            <strong class="h4 mb-0">€ 547,500</strong>
+                    <div class="text-center mb-4">
+                        <div class="display-4 text-success fw-bold">€ {{ (rapports.revenus_mois / 1000)|number_format(1) }}K</div>
+                        <p class="text-muted">Revenus ce mois</p>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Tickets vendus:</span>
+                            <strong>{{ rapports.tickets_annee }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Prix moyen:</span>
+                            <strong>€ 350</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Clients totaux:</span>
+                            <strong>{{ rapports.total_clients }}</strong>
                         </div>
                     </div>
-                    <div class="row text-center">
-                        <div class="col-6 mb-3">
-                            <div class="border rounded p-3">
-                                <div class="h5 text-primary">€ 450,000</div>
-                                <small class="text-muted">Mois dernier</small>
-                            </div>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <div class="border rounded p-3">
-                                <div class="h5 text-info">€ 5.2M</div>
-                                <small class="text-muted">Cette année</small>
-                            </div>
+
+                    <div class="progress mt-4" style="height: 25px;">
+                        {% set objectifAnnuel = 100000 %}
+                        {% set pourcentage = (rapports.revenus_mois / objectifAnnuel * 100)|round %}
+                        <div class="progress-bar bg-success" style="width: {{ pourcentage }}%">
+                            {{ pourcentage }}% de l'objectif
                         </div>
                     </div>
-                    <div class="progress" style="height: 25px;">
-                        <div class="progress-bar bg-success" style="width: 75%">
-                            75% de l'objectif annuel
+                </div>
+
+                <div class="chart-container">
+                    <h5 class="mb-4"><i class="fas fa-chart-pie text-info"></i> Répartition</h5>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Réservations confirmées</span>
+                            <span class="text-success fw-bold">75%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: 75%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>En attente</span>
+                            <span class="text-warning fw-bold">20%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: 20%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Annulées</span>
+                            <span class="text-danger fw-bold">5%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" style="width: 5%"></div>
                         </div>
                     </div>
                 </div>

@@ -1,209 +1,264 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouvel Administrateur - AeroManager</title>
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Administrateur - AeroManager{% endblock %}
+
+{% block body %}
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .form-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
             color: white;
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .back-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateX(-5px);
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-header {
-            text-align: center;
+            padding: 2rem 0;
             margin-bottom: 2rem;
         }
 
-        .card-header h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
-        .card-header p {
-            color: #666;
-        }
-
-        .form-group {
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.9rem 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            background: #f8f9fa;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-control:disabled {
-            background: #e9ecef;
-            cursor: not-allowed;
-        }
-
-        select.form-control {
-            cursor: pointer;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            padding: 0.9rem 1.5rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #333;
-            border: 2px solid #e0e0e0;
-        }
-
-        .btn-secondary:hover {
-            background: #e9ecef;
-        }
-
-        .help-text {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 0.3rem;
-        }
-
-        .icon {
-            font-size: 3rem;
+        .form-section h5 {
+            color: #667eea;
             margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
         }
 
-        @media (max-width: 768px) {
-            .card {
-                padding: 2rem 1.5rem;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
         }
     </style>
-</head>
-<body>
-<div class="container">
-    <a href="{{ path('app_administrateur_index') }}" class="back-link">← Retour à la liste</a>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="icon">👨‍💼</div>
-            <h1>Nouvel Administrateur</h1>
-            <p>Créez un nouveau compte administrateur</p>
-        </div>
-
-        {{ form_start(form) }}
-        <div class="form-group">
-            {{ form_label(form.matricule, 'Matricule') }}
-            {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'placeholder': 'Ex: ADM001'}}) }}
-            <div class="help-text">Identifiant unique de l'administrateur</div>
-            {{ form_errors(form.matricule) }}
-        </div>
-
-        <div class="form-group">
-            {{ form_label(form.niveauAcces, 'Niveau d\'Accès') }}
-            {{ form_widget(form.niveauAcces, {'attr': {'class': 'form-control'}}) }}
-            <div class="help-text">
-                1 = Accès de base | 2 = Accès intermédiaire | 3 = Accès complet
+    <div class="form-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user-plus"></i> Nouvel Administrateur</h1>
+                    <p class="mb-0 opacity-75">Créer un nouveau compte administrateur</p>
+                </div>
+                <a href="{{ path('app_administrateur_index') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
             </div>
-            {{ form_errors(form.niveauAcces) }}
         </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                💾 Enregistrer
-            </button>
-            <a href="{{ path('app_administrateur_index') }}" class="btn btn-secondary">
-                ❌ Annuler
-            </a>
-        </div>
-        {{ form_end(form) }}
     </div>
-</div>
-</body>
-</html>
+
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="form-card">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Information :</strong> Les champs marqués d'un astérisque (*) sont obligatoires.
+                        L'administrateur pourra se connecter avec son email et le mot de passe défini.
+                    </div>
+
+                    {{ form_start(form) }}
+
+                    {# Informations Personnelles #}
+                    <div class="form-section">
+                        <h5><i class="fas fa-user"></i> Informations Personnelles</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold required-field">
+                                    {{ form_label(form.matricule) }}
+                                </label>
+                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'placeholder': 'Ex: ADM001'}}) }}
+                                <small class="text-muted">Identifiant unique de l'administrateur</small>
+                                {{ form_errors(form.matricule) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    {{ form_label(form.niveauAcces) }}
+                                </label>
+                                {{ form_widget(form.niveauAcces, {'attr': {'class': 'form-select'}}) }}
+                                <small class="text-muted">Niveau d'autorisation (1-4)</small>
+                                {{ form_errors(form.niveauAcces) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold required-field">
+                                    {{ form_label(form.nom) }}
+                                </label>
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de famille'}}) }}
+                                {{ form_errors(form.nom) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold required-field">
+                                    {{ form_label(form.prenom) }}
+                                </label>
+                                {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+                                {{ form_errors(form.prenom) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold required-field">
+                                    {{ form_label(form.email) }}
+                                </label>
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'email@example.com'}}) }}
+                                <small class="text-muted">Sera utilisé pour la connexion</small>
+                                {{ form_errors(form.email) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    {{ form_label(form.telephone) }}
+                                </label>
+                                {{ form_widget(form.telephone, {'attr': {'class': 'form-control', 'placeholder': '+216 XX XXX XXX'}}) }}
+                                {{ form_errors(form.telephone) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Sécurité #}
+                    <div class="form-section">
+                        <h5><i class="fas fa-lock"></i> Sécurité</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold required-field">
+                                    {{ form_label(form.plainPassword) }}
+                                </label>
+                                {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Minimum 6 caractères'}}) }}
+                                <small class="text-muted">Le mot de passe doit contenir au moins 6 caractères</small>
+                                {{ form_errors(form.plainPassword) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    {{ form_label(form.actif) }}
+                                </label>
+                                <div class="form-check form-switch mt-2">
+                                    {{ form_widget(form.actif, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
+                                    <label class="form-check-label">
+                                        Activer ce compte
+                                    </label>
+                                </div>
+                                <small class="text-muted">Un compte inactif ne peut pas se connecter</small>
+                                {{ form_errors(form.actif) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Informations Professionnelles #}
+                    <div class="form-section">
+                        <h5><i class="fas fa-briefcase"></i> Informations Professionnelles</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    {{ form_label(form.departement) }}
+                                </label>
+                                {{ form_widget(form.departement, {'attr': {'class': 'form-control', 'placeholder': 'Ex: IT, RH, Finance'}}) }}
+                                {{ form_errors(form.departement) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    Date de Création
+                                </label>
+                                <input type="text" class="form-control" value="{{ 'now'|date('d/m/Y H:i') }}" disabled>
+                                <small class="text-muted">Date de création du compte</small>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold">
+                                    {{ form_label(form.permissions) }}
+                                </label>
+                                {{ form_widget(form.permissions, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Permissions spéciales (optionnel)'}}) }}
+                                <small class="text-muted">Description des permissions particulières accordées</small>
+                                {{ form_errors(form.permissions) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Roles #}
+                    <div class="form-section">
+                        <h5><i class="fas fa-shield-alt"></i> Rôles et Autorisations</h5>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Note :</strong> Le rôle ROLE_ADMIN est automatiquement attribué.
+                        </div>
+                        {{ form_row(form.roles) }}
+                    </div>
+
+                    {# Actions #}
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Créer l'Administrateur
+                        </button>
+                        <a href="{{ path('app_administrateur_index') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+
+                {# Aide #}
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-question-circle"></i> Aide</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Niveaux d'Accès</h6>
+                        <ul class="mb-3">
+                            <li><strong>Niveau 1 :</strong> Accès basique (lecture seule)</li>
+                            <li><strong>Niveau 2 :</strong> Peut modifier les données</li>
+                            <li><strong>Niveau 3 :</strong> Peut créer et supprimer</li>
+                            <li><strong>Niveau 4 :</strong> Accès avancé</li>
+                        </ul>
+
+                        <h6>Bonnes Pratiques</h6>
+                        <ul class="mb-0">
+                            <li>Utilisez un matricule unique et facile à retenir</li>
+                            <li>Choisissez un mot de passe fort (lettres, chiffres, symboles)</li>
+                            <li>Assignez le niveau d'accès minimum nécessaire</li>
+                            <li>Vérifiez l'email avant validation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Form validation feedback
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const password = document.querySelector('input[type="password"]').value;
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Le mot de passe doit contenir au moins 6 caractères !');
+                return false;
+            }
+        });
+    </script>
+{% endblock %}

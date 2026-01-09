@@ -274,7 +274,7 @@ class AdministrateurController extends AbstractController
                 ->getSingleScalarResult(),
         ];
 
-        return $this->render('administrateur/rapports.html.twig', [
+        return $this->render('administrateur/rapports/index.html.twig', [
             'rapports' => $rapports,
         ]);
     }

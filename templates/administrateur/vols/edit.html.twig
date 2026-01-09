@@ -21,14 +21,13 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ form_label(form.NumVol) }}</label>
-                                {{ form_widget(form.NumVol) }}
-                                <small class="form-text text-muted">{{ form_help(form.NumVol) }}</small>
-                                {{ form_errors(form.NumVol) }}
+                                <label class="form-label fw-bold">Numéro de Vol</label>
+                                {{ form_widget(form.numVol) }}
+                                {{ form_errors(form.numVol) }}
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ form_label(form.avion) }}</label>
+                                <label class="form-label fw-bold">Avion</label>
                                 {{ form_widget(form.avion) }}
                                 {{ form_errors(form.avion) }}
                             </div>
@@ -37,7 +36,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-plane-departure text-primary"></i> {{ form_label(form.depart) }}
+                                    <i class="fas fa-plane-departure text-primary"></i> Aéroport de Départ
                                 </label>
                                 {{ form_widget(form.depart) }}
                                 {{ form_errors(form.depart) }}
@@ -45,7 +44,7 @@
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-plane-arrival text-success"></i> {{ form_label(form.arrivee) }}
+                                    <i class="fas fa-plane-arrival text-success"></i> Aéroport d'Arrivée
                                 </label>
                                 {{ form_widget(form.arrivee) }}
                                 {{ form_errors(form.arrivee) }}
@@ -54,38 +53,38 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ form_label(form.DateDepart) }}</label>
-                                {{ form_widget(form.DateDepart) }}
-                                <small class="form-text text-muted">{{ form_help(form.DateDepart) }}</small>
-                                {{ form_errors(form.DateDepart) }}
+                                <label class="form-label fw-bold">Date et Heure de Départ</label>
+                                {{ form_widget(form.dateDepart) }}
+                                <small class="form-text text-muted">Sélectionnez la date et l'heure de départ</small>
+                                {{ form_errors(form.dateDepart) }}
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ form_label(form.DateArrive) }}</label>
-                                {{ form_widget(form.DateArrive) }}
-                                <small class="form-text text-muted">{{ form_help(form.DateArrive) }}</small>
-                                {{ form_errors(form.DateArrive) }}
+                                <label class="form-label fw-bold">Date et Heure d'Arrivée</label>
+                                {{ form_widget(form.dateArrive) }}
+                                <small class="form-text text-muted">Sélectionnez la date et l'heure d'arrivée</small>
+                                {{ form_errors(form.dateArrive) }}
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">{{ form_label(form.port) }}</label>
+                                <label class="form-label fw-bold">Porte d'Embarquement</label>
                                 {{ form_widget(form.port) }}
                                 {{ form_errors(form.port) }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">{{ form_label(form.escale) }}</label>
+                                <label class="form-label fw-bold">Escale</label>
                                 {{ form_widget(form.escale) }}
-                                <small class="form-text text-muted">{{ form_help(form.escale) }}</small>
+                                <small class="form-text text-muted">Optionnel</small>
                                 {{ form_errors(form.escale) }}
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">{{ form_label(form.placesDisponibles) }}</label>
+                                <label class="form-label fw-bold">Places Disponibles</label>
                                 {{ form_widget(form.placesDisponibles) }}
-                                <small class="form-text text-muted">{{ form_help(form.placesDisponibles) }}</small>
+                                <small class="form-text text-muted">Nombre de places disponibles</small>
                                 {{ form_errors(form.placesDisponibles) }}
                             </div>
                         </div>

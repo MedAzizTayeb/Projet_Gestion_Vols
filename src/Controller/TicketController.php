@@ -11,22 +11,17 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
-#[Route('/ticket')]
 class TicketController extends AbstractController
 {
     // Client routes
-    #[Route('/', name: 'app_ticket_index', methods: ['GET'])]
-    public function index(TicketRepository $ticketRepository): Response
+    #[Route('/client/tickets', name: 'app_client_tickets', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function clientIndex(TicketRepository $ticketRepository): Response
     {
         $user = $this->getUser();
-
-        // If admin, show all tickets
-        if ($this->isGranted('ROLE_ADMIN')) {
-            return $this->redirectToRoute('app_ticket_admin_index');
-        }
-
-        // For clients, show only their tickets
         $client = $user->getClient();
 
         if (!$client) {
@@ -34,7 +29,6 @@ class TicketController extends AbstractController
             return $this->redirectToRoute('app_client_dashboard');
         }
 
-        // Get all tickets for this client's reservations
         $tickets = $ticketRepository->createQueryBuilder('t')
             ->join('t.reservation', 'r')
             ->where('r.client = :client')
@@ -48,22 +42,16 @@ class TicketController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_ticket_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Ticket $ticket): Response
+    #[Route('/client/ticket/{id}', name: 'app_client_ticket_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function clientShow(Ticket $ticket): Response
     {
         $user = $this->getUser();
-
-        // If admin, redirect to admin view
-        if ($this->isGranted('ROLE_ADMIN')) {
-            return $this->redirectToRoute('app_ticket_admin_show', ['id' => $ticket->getId()]);
-        }
-
         $client = $user->getClient();
 
-        // Verify the ticket belongs to the current user
-        if ($ticket->getReservation()->getClient() !== $client) {
+        if (!$client || $ticket->getReservation()->getClient() !== $client) {
             $this->addFlash('error', 'Accès non autorisé');
-            return $this->redirectToRoute('app_ticket_index');
+            return $this->redirectToRoute('app_client_tickets');
         }
 
         return $this->render('ticket/show.html.twig', [
@@ -71,28 +59,117 @@ class TicketController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/telecharger', name: 'app_ticket_download', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/client/ticket/{id}/telecharger', name: 'app_client_ticket_download', requirements: ['id' => '\d+'], methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
-    public function download(Ticket $ticket): Response
+    public function clientDownload(Ticket $ticket): Response
     {
         $user = $this->getUser();
         $client = $user->getClient();
 
-        // Verify the ticket belongs to the current user
-        if ($ticket->getReservation()->getClient() !== $client) {
+        if (!$client || $ticket->getReservation()->getClient() !== $client) {
             $this->addFlash('error', 'Accès non autorisé');
-            return $this->redirectToRoute('app_ticket_index');
+            return $this->redirectToRoute('app_client_tickets');
         }
 
-        // For now, redirect to show page
-        // In production, you would generate/serve the actual PDF here
-        $this->addFlash('info', 'La génération du PDF sera implémentée prochainement');
+        // Render HTML
+        $html = $this->renderView('ticket/pdf.html.twig', [
+            'ticket' => $ticket,
+        ]);
 
-        return $this->redirectToRoute('app_ticket_show', ['id' => $ticket->getId()]);
+        // Try PDF generation if library exists
+        if (class_exists('\Dompdf\Dompdf')) {
+            try {
+                $pdfOptions = new \Dompdf\Options();
+                $pdfOptions->set('defaultFont', 'DejaVu Sans');
+                $pdfOptions->set('isRemoteEnabled', false);
+
+                $dompdf = new \Dompdf\Dompdf($pdfOptions);
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+
+                $filename = 'Billet_' . $ticket->getNumero() . '.pdf';
+
+                return new Response(
+                    $dompdf->output(),
+                    200,
+                    [
+                        'Content-Type' => 'application/pdf',
+                        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                    ]
+                );
+            } catch (\Exception $e) {
+                // Continue to HTML fallback
+            }
+        }
+
+        // Fallback: printable HTML
+        return new Response($html);
+    }
+
+    #[Route('/client/ticket/{id}/envoyer', name: 'app_client_ticket_email', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function sendTicketEmail(Ticket $ticket, MailerInterface $mailer): Response
+    {
+        $user = $this->getUser();
+        $client = $user->getClient();
+
+        if (!$client || $ticket->getReservation()->getClient() !== $client) {
+            return $this->json(['success' => false, 'message' => 'Accès non autorisé'], 403);
+        }
+
+        try {
+            $html = $this->renderView('ticket/pdf.html.twig', [
+                'ticket' => $ticket,
+            ]);
+
+            $pdfContent = null;
+            if (class_exists('\Dompdf\Dompdf')) {
+                try {
+                    $pdfOptions = new \Dompdf\Options();
+                    $pdfOptions->set('defaultFont', 'DejaVu Sans');
+                    $pdfOptions->set('isRemoteEnabled', false);
+
+                    $dompdf = new \Dompdf\Dompdf($pdfOptions);
+                    $dompdf->loadHtml($html);
+                    $dompdf->setPaper('A4', 'portrait');
+                    $dompdf->render();
+                    $pdfContent = $dompdf->output();
+                } catch (\Exception $e) {
+                    // PDF generation failed
+                }
+            }
+
+            $email = (new Email())
+                ->from('noreply@aeromanager.com')
+                ->to($user->getEmail())
+                ->subject('Votre billet - ' . $ticket->getNumero())
+                ->html($this->renderView('ticket/email.html.twig', [
+                    'ticket' => $ticket,
+                    'client' => $client,
+                ]));
+
+            if ($pdfContent) {
+                $email->attach($pdfContent, 'Billet_' . $ticket->getNumero() . '.pdf', 'application/pdf');
+            }
+
+            $mailer->send($email);
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Billet envoyé avec succès à ' . $user->getEmail()
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'envoi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // Admin routes
-    #[Route('/admin', name: 'app_ticket_admin_index', methods: ['GET'])]
+    #[Route('/admin/tickets', name: 'app_ticket_admin_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function adminIndex(TicketRepository $ticketRepository): Response
     {
@@ -103,7 +180,7 @@ class TicketController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/new', name: 'app_ticket_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/ticket/new', name: 'app_ticket_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -112,22 +189,18 @@ class TicketController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Auto-generate ticket number if not set
             if (!$ticket->getNumero()) {
                 $ticket->setNumero('TKT-' . strtoupper(uniqid()));
             }
 
-            // Auto-generate idTicket if not set
             if (!$ticket->getIdTicket()) {
                 $ticket->setIdTicket(random_int(100000, 999999));
             }
 
-            // Set creation date if not set
             if (!$ticket->getDateCreation()) {
                 $ticket->setDateCreation(new \DateTime());
             }
 
-            // Set default PDF path if not set
             if (!$ticket->getPdfPath()) {
                 $ticket->setPdfPath('/tickets/' . $ticket->getNumero() . '.pdf');
             }
@@ -146,7 +219,7 @@ class TicketController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/{id}', name: 'app_ticket_admin_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/admin/ticket/{id}', name: 'app_ticket_admin_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function adminShow(Ticket $ticket): Response
     {
@@ -155,7 +228,7 @@ class TicketController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/{id}/edit', name: 'app_ticket_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    #[Route('/admin/ticket/{id}/edit', name: 'app_ticket_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Ticket $ticket, EntityManagerInterface $entityManager): Response
     {
@@ -176,7 +249,7 @@ class TicketController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/{id}', name: 'app_ticket_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[Route('/admin/ticket/{id}', name: 'app_ticket_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Ticket $ticket, EntityManagerInterface $entityManager): Response
     {

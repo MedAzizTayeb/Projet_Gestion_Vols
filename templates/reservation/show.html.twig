@@ -11,174 +11,385 @@
             margin-bottom: 2rem;
         }
 
-        .success-icon {
-            font-size: 4rem;
-            animation: bounce 1s ease-in-out;
+        .status-badge {
+            font-size: 1.2rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            position: relative;
         }
 
-        .info-section {
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step.completed .step-number {
+            background: #28a745;
+            color: white;
+        }
+
+        .step.active .step-number {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-line {
+            position: absolute;
+            top: 25px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .step.completed .step-line {
+            background: #28a745;
+        }
+
+        .action-card {
             background: white;
             border-radius: 15px;
             padding: 2rem;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
+            border-left: 5px solid #667eea;
         }
 
-        .status-badge {
-            font-size: 1.2rem;
-            padding: 0.5rem 1.5rem;
-            border-radius: 20px;
+        .passenger-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #28a745;
+        }
+
+        .missing-info-alert {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
     </style>
 
     <div class="reservation-header">
-        <div class="container text-center">
-            <div class="success-icon mb-3">
-                <i class="fas fa-check-circle"></i>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-ticket-alt"></i> Réservation {{ reservation.reference }}</h1>
+                    <p class="mb-0 opacity-75">Confirmez votre réservation et ajoutez les passagers</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="status-badge
+                        {% if reservation.statut == 'confirmé' %}bg-success
+                        {% elseif reservation.statut == 'en attente' %}bg-warning text-dark
+                        {% else %}bg-secondary{% endif %}">
+                        {{ reservation.statut|upper }}
+                    </span>
+                </div>
             </div>
-            <h1>Réservation Confirmée !</h1>
-            <p class="mb-0 opacity-75">Référence: {{ reservation.reference }}</p>
         </div>
     </div>
 
     <div class="container pb-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <!-- Statut -->
-                <div class="info-section text-center">
-                    <h4 class="mb-3">Statut de votre réservation</h4>
-                    {% if reservation.statut == 'confirmé' %}
-                        <span class="status-badge badge bg-success">
-                        <i class="fas fa-check-circle"></i> Confirmée
-                    </span>
-                    {% elseif reservation.statut == 'en attente' %}
-                        <span class="status-badge badge bg-warning text-dark">
-                        <i class="fas fa-clock"></i> En attente de paiement
-                    </span>
-                    {% elseif reservation.statut == 'annulé' %}
-                        <span class="status-badge badge bg-danger">
-                        <i class="fas fa-times-circle"></i> Annulée
-                    </span>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Indicateur d'étapes -->
+        <div class="step-indicator">
+            <div class="step completed">
+                <div class="step-line"></div>
+                <div class="step-number"><i class="fas fa-check"></i></div>
+                <div class="step-label">Réservation créée</div>
+            </div>
+            <div class="step {% if reservation.passagers|length > 0 %}completed{% else %}active{% endif %}">
+                <div class="step-line"></div>
+                <div class="step-number">
+                    {% if reservation.passagers|length > 0 %}
+                        <i class="fas fa-check"></i>
                     {% else %}
-                        <span class="status-badge badge bg-secondary">
-                        {{ reservation.statut }}
-                    </span>
+                        2
                     {% endif %}
                 </div>
+                <div class="step-label">Passagers</div>
+            </div>
+            <div class="step {% if reservation.paiement %}completed{% elseif reservation.passagers|length > 0 %}active{% endif %}">
+                <div class="step-line"></div>
+                <div class="step-number">
+                    {% if reservation.paiement %}
+                        <i class="fas fa-check"></i>
+                    {% else %}
+                        3
+                    {% endif %}
+                </div>
+                <div class="step-label">Paiement</div>
+            </div>
+            <div class="step {% if reservation.tickets|length > 0 %}completed active{% endif %}">
+                <div class="step-number">
+                    {% if reservation.tickets|length > 0 %}
+                        <i class="fas fa-check"></i>
+                    {% else %}
+                        4
+                    {% endif %}
+                </div>
+                <div class="step-label">Billets</div>
+            </div>
+        </div>
 
-                <!-- Informations de vol -->
-                {% if reservation.vol %}
-                    <div class="info-section">
-                        <h4 class="mb-4">
-                            <i class="fas fa-plane"></i> Détails du Vol
-                        </h4>
+        {% set nbPassagersPrevu = app.session.get('reservation_nb_passagers_' ~ reservation.id, 1) %}
+        {% set nbPassagersActuel = reservation.passagers|length %}
+        {% set passagersManquants = nbPassagersPrevu - nbPassagersActuel %}
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="text-muted small">Numéro de vol</label>
-                                    <div class="h5">{{ reservation.vol.numVol }}</div>
+        <!-- Alerte passagers manquants -->
+        {% if passagersManquants > 0 %}
+            <div class="missing-info-alert pulse-animation">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h4 class="mb-2">⚠️ Action Requise : Ajoutez les passagers</h4>
+                        <p class="mb-3">
+                            Vous devez ajouter les informations de <strong>{{ passagersManquants }} passager(s)</strong>
+                            avant de procéder au paiement.
+                        </p>
+                        <a href="{{ path('app_passager_add', {'reservationId': reservation.id}) }}"
+                           class="btn btn-light btn-lg">
+                            <i class="fas fa-user-plus"></i> Ajouter les {{ passagersManquants }} Passager(s) Maintenant
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Informations du vol -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plane"></i> Détails du Vol</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if reservation.vol %}
+                            <div class="row mb-3">
+                                <div class="col-md-4 text-center">
+                                    <div class="h2 text-primary">{{ reservation.vol.depart.codeIATA }}</div>
+                                    <div>{{ reservation.vol.depart.ville }}</div>
+                                    <small class="text-muted">{{ reservation.vol.depart.pays }}</small>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="text-muted small">Date de départ</label>
-                                    <div class="h5">{{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}</div>
+                                <div class="col-md-4 text-center">
+                                    <i class="fas fa-plane fa-2x text-muted"></i>
+                                    <div class="mt-2"><strong>{{ reservation.vol.numVol }}</strong></div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="h2 text-primary">{{ reservation.vol.arrivee.codeIATA }}</div>
+                                    <div>{{ reservation.vol.arrivee.ville }}</div>
+                                    <small class="text-muted">{{ reservation.vol.arrivee.pays }}</small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="text-muted small">Itinéraire</label>
-                                    <div class="h5">
-                                        {{ reservation.vol.depart.codeIATA }}
-                                        <i class="fas fa-arrow-right text-muted mx-2"></i>
-                                        {{ reservation.vol.arrivee.codeIATA }}
-                                    </div>
-                                    <small class="text-muted">
-                                        {{ reservation.vol.depart.ville }} → {{ reservation.vol.arrivee.ville }}
-                                    </small>
+
+                            <hr>
+
+                            <div class="row text-center">
+                                <div class="col-md-6">
+                                    <strong>Date de départ</strong><br>
+                                    <i class="fas fa-calendar text-primary"></i> {{ reservation.vol.dateDepart|date('d/m/Y à H:i') }}
                                 </div>
-                                <div class="mb-3">
-                                    <label class="text-muted small">Porte d'embarquement</label>
-                                    <div class="h5">{{ reservation.vol.port }}</div>
+                                <div class="col-md-6">
+                                    <strong>Date d'arrivée</strong><br>
+                                    <i class="fas fa-calendar text-success"></i> {{ reservation.vol.dateArrive|date('d/m/Y à H:i') }}
                                 </div>
                             </div>
-                        </div>
-
-                        {% if reservation.vol.escale %}
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>Escale(s):</strong> {{ reservation.vol.escale }}
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Informations du vol non disponibles
                             </div>
                         {% endif %}
                     </div>
-                {% endif %}
-
-                <!-- Informations de réservation -->
-                <div class="info-section">
-                    <h4 class="mb-4">
-                        <i class="fas fa-file-alt"></i> Informations de Réservation
-                    </h4>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Référence</label>
-                            <div class="h5 font-monospace">{{ reservation.reference }}</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Date de réservation</label>
-                            <div class="h5">{{ reservation.dateRes|date('d/m/Y à H:i') }}</div>
-                        </div>
-                    </div>
                 </div>
 
+                <!-- Liste des passagers -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-users"></i> Passagers ({{ nbPassagersActuel }}/{{ nbPassagersPrevu }})</h5>
+                        {% if passagersManquants > 0 %}
+                            <a href="{{ path('app_passager_add', {'reservationId': reservation.id}) }}"
+                               class="btn btn-light btn-sm">
+                                <i class="fas fa-plus"></i> Ajouter
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if reservation.passagers|length > 0 %}
+                            {% for passager in reservation.passagers %}
+                                <div class="passenger-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-2">
+                                                <i class="fas fa-user-circle text-primary"></i>
+                                                {{ passager.nom }} {{ passager.prenom }}
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-2">
+                                                    <small class="text-muted">Passeport:</small>
+                                                    <strong>{{ passager.numPassport }}</strong>
+                                                </div>
+                                                <div class="col-md-6 mb-2">
+                                                    <small class="text-muted">Nationalité:</small>
+                                                    <strong>{{ passager.nationalite }}</strong>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">Date de naissance:</small>
+                                                    <strong>{{ passager.dateNaissance|date('d/m/Y') }}</strong>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">Bagages:</small>
+                                                    <strong>{{ passager.poidsBagages }} kg</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="ms-3">
+                                            <a href="{{ path('app_passager_edit', {'id': passager.id}) }}"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Aucun passager ajouté</p>
+                                <a href="{{ path('app_passager_add', {'reservationId': reservation.id}) }}"
+                                   class="btn btn-primary">
+                                    <i class="fas fa-user-plus"></i> Ajouter les Passagers
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
                 <!-- Actions -->
-                <div class="info-section">
-                    {% if reservation.statut == 'en attente' %}
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Action requise:</strong> Votre réservation est en attente. Veuillez procéder au paiement pour la confirmer.
+                <div class="action-card">
+                    <h5 class="mb-4"><i class="fas fa-tasks"></i> Prochaines Étapes</h5>
+
+                    {% if passagersManquants > 0 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>Étape 1:</strong> Ajoutez {{ passagersManquants }} passager(s)
                         </div>
-                        <div class="d-grid gap-2">
-                            <a href="{{ path('app_paiement_new', {'reservationId': reservation.id}) }}"
-                               class="btn btn-success btn-lg">
-                                <i class="fas fa-credit-card"></i> Procéder au Paiement
+                        <div class="d-grid gap-2 mb-3">
+                            <a href="{{ path('app_passager_add', {'reservationId': reservation.id}) }}"
+                               class="btn btn-warning btn-lg">
+                                <i class="fas fa-user-plus"></i> Ajouter les Passagers
                             </a>
                         </div>
-                    {% elseif reservation.statut == 'confirmé' %}
+                    {% else %}
                         <div class="alert alert-success mb-3">
                             <i class="fas fa-check-circle"></i>
-                            <strong>Réservation confirmée!</strong> Vous recevrez vos billets par email sous peu.
+                            Tous les passagers sont ajoutés !
                         </div>
-                        <div class="d-grid gap-2">
-                            <a href="{{ path('app_client_tickets') }}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-ticket-alt"></i> Voir mes Billets
-                            </a>
-                        </div>
+
+                        {% if not reservation.paiement %}
+                            <div class="d-grid gap-2 mb-3">
+                                <a href="{{ path('app_paiement_new', {'reservationId': reservation.id}) }}"
+                                   class="btn btn-success btn-lg">
+                                    <i class="fas fa-credit-card"></i> Procéder au Paiement
+                                </a>
+                            </div>
+                        {% else %}
+
+                            {% if reservation.tickets|length > 0 %}
+                                <div class="d-grid gap-2 mb-3">
+                                    <a href="{{ path('app_client_tickets') }}"
+                                       class="btn btn-primary btn-lg">
+                                        <i class="fas fa-ticket-alt"></i> Voir mes Billets
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
 
-                    <div class="d-grid gap-2 mt-2">
-                        <a href="{{ path('app_mes_reservations') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-list"></i> Mes Réservations
-                        </a>
+                    <hr>
+
+                    <div class="d-grid gap-2">
                         <a href="{{ path('app_client_dashboard') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-home"></i> Retour au Dashboard
                         </a>
                     </div>
                 </div>
 
-                <!-- Important info -->
-                <div class="alert alert-info">
-                    <h6><i class="fas fa-info-circle"></i> Informations Importantes</h6>
-                    <ul class="mb-0">
-                        <li>Présentez-vous à l'aéroport au moins 2 heures avant le départ</li>
-                        <li>Munissez-vous d'une pièce d'identité valide</li>
-                        <li>Consultez les restrictions de bagages</li>
-                        <li>Gardez votre référence de réservation: <strong>{{ reservation.reference }}</strong></li>
-                    </ul>
+                <!-- Résumé -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0"><i class="fas fa-info-circle"></i> Récapitulatif</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <strong>Référence:</strong><br>
+                                <span class="font-monospace">{{ reservation.reference }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Date de réservation:</strong><br>
+                                {{ reservation.dateRes|date('d/m/Y à H:i') }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Statut:</strong><br>
+                                <span class="badge bg-{{ reservation.statut == 'confirmé' ? 'success' : 'warning' }}">
+                                    {{ reservation.statut }}
+                                </span>
+                            </li>
+                            <li>
+                                <strong>Passagers:</strong><br>
+                                {{ nbPassagersActuel }} / {{ nbPassagersPrevu }}
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

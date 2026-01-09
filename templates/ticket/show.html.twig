@@ -256,7 +256,7 @@
                                 </div>
                             </div>
                             <div class="text-muted small mt-2">
-                                {% set duration = date(ticket.vol.dateArrivee).timestamp - date(ticket.vol.dateDepart).timestamp %}
+                                {% set duration = date(ticket.vol.dateArrive).timestamp - date(ticket.vol.dateDepart).timestamp %}
                                 {{ (duration / 3600)|round }} heures
                             </div>
                         </div>
@@ -283,7 +283,7 @@
 
                         <div class="info-box">
                             <div class="info-box-label">Arrivée</div>
-                            <div class="info-box-value">{{ ticket.vol.dateArrivee|date('H:i') }}</div>
+                            <div class="info-box-value">{{ ticket.vol.dateArrive|date('H:i') }}</div>
                         </div>
 
                         {% if ticket.vol.avion %}
@@ -332,7 +332,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <strong>Date Réservation</strong><br>
-                                    {{ ticket.reservation.dateReservation|date('d/m/Y') }}
+                                    {{ ticket.reservation.dateRes|date('d/m/Y') }}
                                 </div>
                                 <div class="col-md-4">
                                     <strong>Date Émission</strong><br>

@@ -4,6 +4,16 @@
 
 {% block body %}
     <div class="container py-4">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         <h1 class="mb-4">
             <i class="fas fa-user-circle text-primary"></i> Mon Profil
         </h1>
@@ -24,12 +34,12 @@
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
-                            <button class="btn btn-primary">
+                            <a href="{{ path('app_client_profil_edit') }}" class="btn btn-primary">
                                 <i class="fas fa-edit"></i> Modifier le profil
-                            </button>
-                            <button class="btn btn-outline-secondary">
+                            </a>
+                            <a href="{{ path('app_client_change_password') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-key"></i> Changer mot de passe
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -61,6 +71,11 @@
                                 <label class="text-muted small">Téléphone</label>
                                 <div class="h6">{{ client.telephone ?: 'Non renseigné' }}</div>
                             </div>
+                        </div>
+
+                        <div class="alert alert-info mt-4 mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            Ces informations sont utilisées pour vos réservations et communications.
                         </div>
                     </div>
                 </div>
@@ -95,9 +110,86 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="alert alert-success mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-star"></i>
+                                    <strong>Statut :</strong>
+                                    {% if client.reservations|length > 10 %}
+                                        Client Gold
+                                    {% elseif client.reservations|length > 5 %}
+                                        Client Silver
+                                    {% else %}
+                                        Client Standard
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> Activité Récente</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if client.reservations|slice(0, 5)|length > 0 %}
+                            <div class="list-group">
+                                {% for reservation in client.reservations|slice(0, 5) %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-plane text-primary"></i>
+                                                Réservation {{ reservation.reference }}
+                                            </h6>
+                                            <small>{{ reservation.dateRes|date('d/m/Y') }}</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            {% if reservation.vol %}
+                                                Vol {{ reservation.vol.numVol }} -
+                                                {{ reservation.vol.depart.ville }} → {{ reservation.vol.arrivee.ville }}
+                                            {% else %}
+                                                Vol non spécifié
+                                            {% endif %}
+                                        </p>
+                                        <small>
+                                            {% if reservation.statut == 'confirmé' %}
+                                                <span class="badge bg-success">Confirmé</span>
+                                            {% elseif reservation.statut == 'annulé' %}
+                                                <span class="badge bg-danger">Annulé</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">En attente</span>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="{{ path('app_client_reservations') }}" class="btn btn-sm btn-outline-primary">
+                                    Voir toutes mes réservations
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-3 text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Aucune activité récente
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
 {% endblock %}

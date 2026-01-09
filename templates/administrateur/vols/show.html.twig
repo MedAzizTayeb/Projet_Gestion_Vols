@@ -169,14 +169,14 @@
                                             </td>
                                             <td>{{ reservation.dateRes|date('d/m/Y H:i') }}</td>
                                             <td>
-                                                {% if reservation.satut == 'confirmé' %}
+                                                {% if reservation.statut == 'confirmé' %}
                                                     <span class="badge bg-success">Confirmé</span>
-                                                {% elseif reservation.satut == 'en attente' %}
+                                                {% elseif reservation.statut == 'en attente' %}
                                                     <span class="badge bg-warning">En attente</span>
-                                                {% elseif reservation.satut == 'annulé' %}
+                                                {% elseif reservation.statut == 'annulé' %}
                                                     <span class="badge bg-danger">Annulé</span>
                                                 {% else %}
-                                                    <span class="badge bg-secondary">{{ reservation.satut }}</span>
+                                                    <span class="badge bg-secondary">{{ reservation.statut }}</span>
                                                 {% endif %}
                                             </td>
                                         </tr>
@@ -204,7 +204,7 @@
                             <div class="col-md-3 mb-3">
                                 <div class="border rounded p-3">
                                     <h3 class="text-success mb-0">
-                                        {{ vol.reservations|filter(r => r.satut == 'confirmé')|length }}
+                                        {{ vol.reservations|filter(r => r.statut == 'confirmé')|length }}
                                     </h3>
                                     <small class="text-muted">Confirmées</small>
                                 </div>

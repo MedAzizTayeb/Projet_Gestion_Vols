@@ -63,7 +63,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="border rounded p-2">
-                                    {% set confirmed = client.reservations|filter(r => r.satut == 'confirmé')|length %}
+                                    {% set confirmed = client.reservations|filter(r => r.statut == 'confirmé')|length %}
                                     <div class="h4 text-success mb-0">{{ confirmed }}</div>
                                     <small class="text-muted">Confirmées</small>
                                 </div>
@@ -124,14 +124,14 @@
                                                 <small>{{ reservation.dateRes|date('d/m/Y H:i') }}</small>
                                             </td>
                                             <td>
-                                                {% if reservation.satut == 'confirmé' %}
+                                                {% if reservation.statut == 'confirmé' %}
                                                     <span class="badge bg-success">Confirmé</span>
-                                                {% elseif reservation.satut == 'en attente' %}
+                                                {% elseif reservation.statut == 'en attente' %}
                                                     <span class="badge bg-warning text-dark">En attente</span>
-                                                {% elseif reservation.satut == 'annulé' %}
+                                                {% elseif reservation.statut == 'annulé' %}
                                                     <span class="badge bg-danger">Annulé</span>
                                                 {% else %}
-                                                    <span class="badge bg-secondary">{{ reservation.satut }}</span>
+                                                    <span class="badge bg-secondary">{{ reservation.statut }}</span>
                                                 {% endif %}
                                             </td>
                                         </tr>
@@ -152,14 +152,14 @@
                         <div class="row text-center">
                             <div class="col-md-4 mb-3">
                                 <div class="border rounded p-3">
-                                    {% set pending = client.reservations|filter(r => r.satut == 'en attente')|length %}
+                                    {% set pending = client.reservations|filter(r => r.statut == 'en attente')|length %}
                                     <h3 class="text-warning mb-0">{{ pending }}</h3>
                                     <small class="text-muted">En attente</small>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <div class="border rounded p-3">
-                                    {% set cancelled = client.reservations|filter(r => r.satut == 'annulé')|length %}
+                                    {% set cancelled = client.reservations|filter(r => r.statut == 'annulé')|length %}
                                     <h3 class="text-danger mb-0">{{ cancelled }}</h3>
                                     <small class="text-muted">Annulées</small>
                                 </div>

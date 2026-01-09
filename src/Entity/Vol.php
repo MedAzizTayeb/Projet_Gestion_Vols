@@ -16,7 +16,7 @@ class Vol
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $NumVol = null;
+    private ?string $num_vol = null;
 
     #[ORM\Column]
     private ?\DateTime $DateDepart = null;
@@ -75,12 +75,12 @@ class Vol
 
     public function getNumVol(): ?string
     {
-        return $this->NumVol;
+        return $this->num_vol;
     }
 
-    public function setNumVol(string $NumVol): static
+    public function setNumVol(string $num_vol): static
     {
-        $this->NumVol = $NumVol;
+        $this->num_vol = $num_vol;
         return $this;
     }
 
@@ -250,6 +250,6 @@ class Vol
 
     public function __toString(): string
     {
-        return $this->NumVol . ' - ' . $this->getDepart()?->getVille() . ' → ' . $this->getArrivee()?->getVille();
+        return $this->num_vol . ' - ' . $this->getDepart()?->getVille() . ' → ' . $this->getArrivee()?->getVille();
     }
 }

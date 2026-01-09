@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - AeroManager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -24,50 +25,96 @@
         }
 
         body::before {
-            content: '✈️';
+            content: '';
             position: absolute;
-            font-size: 3rem;
-            opacity: 0.1;
-            animation: float 20s infinite ease-in-out;
-            top: 10%;
-            left: 10%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 1;
         }
 
-        body::after {
-            content: '🛫';
+        .floating-planes {
             position: absolute;
-            font-size: 4rem;
-            opacity: 0.1;
-            animation: float 25s infinite ease-in-out reverse;
-            bottom: 15%;
-            right: 15%;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(10deg); }
+        .plane {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.15;
+            animation: fly 25s linear infinite;
+        }
+
+        .plane:nth-child(1) {
+            top: 15%;
+            animation-duration: 20s;
+            animation-delay: 0s;
+        }
+
+        .plane:nth-child(2) {
+            top: 45%;
+            animation-duration: 30s;
+            animation-delay: 5s;
+        }
+
+        .plane:nth-child(3) {
+            top: 75%;
+            animation-duration: 25s;
+            animation-delay: 10s;
+        }
+
+        @keyframes fly {
+            0% {
+                left: -10%;
+                transform: rotate(-5deg);
+            }
+            100% {
+                left: 110%;
+                transform: rotate(5deg);
+            }
         }
 
         .login-container {
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             position: relative;
             z-index: 1;
             animation: slideUp 0.6s ease-out;
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
+            background: white;
+            border-radius: 25px;
             padding: 3rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         }
 
         .login-header {
@@ -75,23 +122,38 @@
             margin-bottom: 2.5rem;
         }
 
-        .logo {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            animation: pulse 2s infinite;
+        .logo-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            animation: logoFloat 3s ease-in-out infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo-wrapper i {
+            font-size: 2.5rem;
+            color: white;
         }
 
         .login-header h1 {
             font-size: 2rem;
             margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #333;
+            font-weight: 700;
         }
 
         .login-header p {
@@ -101,12 +163,11 @@
 
         .form-group {
             margin-bottom: 1.5rem;
-            position: relative;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             color: #333;
             font-weight: 600;
             font-size: 0.9rem;
@@ -118,22 +179,23 @@
 
         .input-icon {
             position: absolute;
-            left: 1rem;
+            left: 1.2rem;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 1.2rem;
             color: #667eea;
+            font-size: 1.1rem;
             opacity: 0.7;
+            transition: all 0.3s;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.9rem 1rem 0.9rem 3rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
+            padding: 1rem 1rem 1rem 3.2rem;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s;
-            background: #f8f9fa;
+            background: #fafafa;
         }
 
         .form-control:focus {
@@ -143,19 +205,26 @@
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
+        .form-control:focus + .input-icon {
+            color: #667eea;
+            opacity: 1;
+        }
+
         .form-options {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.8rem;
             font-size: 0.9rem;
         }
 
         .remember-me {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
             color: #666;
+            cursor: pointer;
+            user-select: none;
         }
 
         .remember-me input[type="checkbox"] {
@@ -165,22 +234,39 @@
             accent-color: #667eea;
         }
 
+        .forgot-password {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .forgot-password:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
         .btn-login {
             width: 100%;
-            padding: 1rem;
+            padding: 1.1rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
         }
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
         }
 
         .divider {
@@ -196,31 +282,38 @@
             top: 50%;
             width: 100%;
             height: 1px;
-            background: #e0e0e0;
+            background: #e8e8e8;
         }
 
         .divider span {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 0 1rem;
+            background: white;
+            padding: 0 1.2rem;
             color: #999;
             font-size: 0.9rem;
             position: relative;
+            font-weight: 500;
         }
 
         .signup-link {
             text-align: center;
             color: #666;
             font-size: 0.95rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-top: 1.5rem;
         }
 
         .signup-link a {
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
+            transition: all 0.3s;
         }
 
         .signup-link a:hover {
             color: #764ba2;
+            text-decoration: underline;
         }
 
         .back-home {
@@ -233,27 +326,31 @@
         .btn-back {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
+            gap: 0.6rem;
+            padding: 0.8rem 1.6rem;
+            background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
             color: white;
             text-decoration: none;
-            border-radius: 25px;
+            border-radius: 50px;
             font-weight: 600;
             transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .btn-back:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.35);
             transform: translateX(-5px);
         }
 
         .alert {
-            padding: 1rem;
+            padding: 1rem 1.2rem;
             border-radius: 12px;
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
         }
 
         .alert-error {
@@ -263,47 +360,73 @@
         }
 
         .alert-success {
-            background: #efe;
-            color: #3c3;
-            border: 1px solid #cfc;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert i {
+            font-size: 1.2rem;
         }
 
         @media (max-width: 768px) {
-            .login-card { padding: 2rem 1.5rem; }
-            .back-home { top: 1rem; left: 1rem; }
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+            .back-home {
+                top: 1rem;
+                left: 1rem;
+            }
+            .btn-back {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
+<div class="floating-planes">
+    <div class="plane">✈️</div>
+    <div class="plane">🛫</div>
+    <div class="plane">✈️</div>
+</div>
+
 <div class="back-home">
-    <a href="/" class="btn-back">← Retour à l'accueil</a>
+    <a href="/" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Retour à l'accueil
+    </a>
 </div>
 
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <div class="logo">✈️</div>
-            <h1>Bienvenue</h1>
+            <div class="logo-wrapper">
+                <i class="fas fa-plane"></i>
+            </div>
+            <h1>Bienvenue !</h1>
             <p>Connectez-vous à votre compte AeroManager</p>
         </div>
 
+        <!-- Error Alert (Symfony Template) -->
         {% if error %}
             <div class="alert alert-error">
-                ❌ {{ error.messageKey|trans(error.messageData, 'security') }}
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ error.messageKey|trans(error.messageData, 'security') }}</span>
             </div>
         {% endif %}
 
+        <!-- Success Alert (Symfony Template) -->
         {% for message in app.flashes('success') %}
             <div class="alert alert-success">
-                ✅ {{ message }}
+                <i class="fas fa-check-circle"></i>
+                <span>{{ message }}</span>
             </div>
         {% endfor %}
 
         <form method="post" action="{{ path('app_login') }}">
             <div class="form-group">
-                <label for="username">Email</label>
+                <label for="username">Adresse email</label>
                 <div class="input-wrapper">
-                    <span class="input-icon">👤</span>
                     <input
                         type="email"
                         id="username"
@@ -312,23 +435,24 @@
                         value="{{ last_username }}"
                         required
                         autofocus
-                        placeholder="votreemail@exemple.com"
+                        placeholder="votre.email@exemple.com"
                     >
+                    <i class="fas fa-envelope input-icon"></i>
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="password">Mot de passe</label>
                 <div class="input-wrapper">
-                    <span class="input-icon">🔒</span>
                     <input
                         type="password"
                         id="password"
                         name="_password"
                         class="form-control"
                         required
-                        placeholder="••••••••"
+                        placeholder="Entrez votre mot de passe"
                     >
+                    <i class="fas fa-lock input-icon"></i>
                 </div>
             </div>
 
@@ -339,9 +463,12 @@
                     <input type="checkbox" name="_remember_me">
                     <span>Se souvenir de moi</span>
                 </label>
+                <a href="#" class="forgot-password">Mot de passe oublié ?</a>
             </div>
 
-            <button type="submit" class="btn-login">Se connecter</button>
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </button>
         </form>
 
         <div class="divider">
@@ -349,7 +476,7 @@
         </div>
 
         <div class="signup-link">
-            Pas encore de compte ? <a href="/register">S'inscrire maintenant</a>
+            Pas encore de compte ? <a href="/register"><i class="fas fa-user-plus"></i> Créer un compte</a>
         </div>
     </div>
 </div>

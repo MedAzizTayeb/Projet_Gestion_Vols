@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Billet {{ ticket.numero }}</title>
+    <style>
+        @page {
+            margin: 15mm;
+        }
+
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            font-size: 12pt;
+        }
+
+        .ticket {
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .company-logo {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .ticket-type {
+            font-size: 11pt;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .ticket-number {
+            font-size: 28pt;
+            font-weight: bold;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-banner {
+            background: #28a745;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .status-cancelled {
+            background: #dc3545;
+        }
+
+        .body {
+            padding: 25px;
+        }
+
+        .route {
+            display: table;
+            width: 100%;
+            margin: 25px 0;
+        }
+
+        .airport {
+            display: table-cell;
+            text-align: center;
+            width: 35%;
+            vertical-align: middle;
+        }
+
+        .airport-code {
+            font-size: 42pt;
+            font-weight: bold;
+            color: #667eea;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .airport-city {
+            font-size: 11pt;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .arrow {
+            display: table-cell;
+            text-align: center;
+            width: 30%;
+            vertical-align: middle;
+        }
+
+        .plane-icon {
+            font-size: 32pt;
+            color: #28a745;
+        }
+
+        .flight-number {
+            font-size: 9pt;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .info-grid {
+            display: table;
+            width: 100%;
+            margin: 25px 0;
+            border-collapse: separate;
+            border-spacing: 10px;
+        }
+
+        .info-row {
+            display: table-row;
+        }
+
+        .info-box {
+            display: table-cell;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            width: 25%;
+        }
+
+        .info-label {
+            font-size: 9pt;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .section-title {
+            font-size: 13pt;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .passenger-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .passenger-grid {
+            display: table;
+            width: 100%;
+        }
+
+        .passenger-row {
+            display: table-row;
+        }
+
+        .passenger-cell {
+            display: table-cell;
+            padding: 8px 15px;
+            width: 50%;
+        }
+
+        .passenger-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 10pt;
+        }
+
+        .passenger-value {
+            font-size: 12pt;
+            color: #333;
+            margin-top: 3px;
+        }
+
+        .reservation-info {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .reservation-grid {
+            display: table;
+            width: 100%;
+        }
+
+        .reservation-row {
+            display: table-row;
+        }
+
+        .reservation-cell {
+            display: table-cell;
+            text-align: center;
+            padding: 10px;
+            width: 33.33%;
+        }
+
+        .barcode {
+            background: repeating-linear-gradient(
+                90deg,
+                #000,
+                #000 3px,
+                transparent 3px,
+                transparent 6px
+            );
+            height: 70px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+
+        .barcode-number {
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 11pt;
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+
+        .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            border: 3px dashed #999;
+            margin: 20px auto;
+            display: block;
+            text-align: center;
+            line-height: 120px;
+            font-size: 40pt;
+            color: #ccc;
+            border-radius: 10px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 2px dashed #dee2e6;
+            margin-top: 20px;
+        }
+
+        .footer-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 11pt;
+        }
+
+        .footer-text {
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #666;
+            margin: 8px 0;
+        }
+
+        .footer-meta {
+            font-size: 9pt;
+            color: #999;
+            margin-top: 15px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+        }
+
+        .important-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .important-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 11pt;
+        }
+
+        .important-text {
+            color: #856404;
+            font-size: 10pt;
+            line-height: 1.6;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        ul li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="ticket">
+    <!-- Header -->
+    <div class="header">
+        <div class="company-logo">✈ AEROMANAGER</div>
+        <div class="ticket-type">Billet Électronique / E-Ticket</div>
+        <div class="ticket-number">{{ ticket.numero }}</div>
+    </div>
+
+    <!-- Status Banner -->
+    {% if ticket.reservation.statut == 'confirmé' %}
+        <div class="status-banner">✓ BILLET VALIDE</div>
+    {% elseif ticket.reservation.statut == 'annulé' %}
+        <div class="status-banner status-cancelled">✗ BILLET ANNULÉ</div>
+    {% endif %}
+
+    <!-- Body -->
+    <div class="body">
+        {% if ticket.vol %}
+            <!-- Flight Route -->
+            <div class="route">
+                <div class="airport">
+                    <div class="airport-code">{{ ticket.vol.depart.codeIATA|default(ticket.vol.depart.ville|slice(0, 3)|upper) }}</div>
+                    <div class="airport-city">{{ ticket.vol.depart.ville }}</div>
+                    <div style="font-size: 9pt; color: #999;">{{ ticket.vol.depart.pays }}</div>
+                </div>
+                <div class="arrow">
+                    <div class="plane-icon">✈</div>
+                    <div class="flight-number">Vol {{ ticket.vol.numVol }}</div>
+                </div>
+                <div class="airport">
+                    <div class="airport-code">{{ ticket.vol.arrivee.codeIATA|default(ticket.vol.arrivee.ville|slice(0, 3)|upper) }}</div>
+                    <div class="airport-city">{{ ticket.vol.arrivee.ville }}</div>
+                    <div style="font-size: 9pt; color: #999;">{{ ticket.vol.arrivee.pays }}</div>
+                </div>
+            </div>
+
+            <!-- Flight Information Grid -->
+            <div class="info-grid">
+                <div class="info-row">
+                    <div class="info-box">
+                        <div class="info-label">Date</div>
+                        <div class="info-value">{{ ticket.vol.dateDepart|date('d/m/Y') }}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Départ</div>
+                        <div class="info-value">{{ ticket.vol.dateDepart|date('H:i') }}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Arrivée</div>
+                        <div class="info-value">{{ ticket.vol.dateArrive|date('H:i') }}</div>
+                    </div>
+                    {% if ticket.vol.avion %}
+                        <div class="info-box">
+                            <div class="info-label">Avion</div>
+                            <div class="info-value" style="font-size: 11pt;">{{ ticket.vol.avion.modele }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Passenger Information -->
+        {% if ticket.passager %}
+            <div class="section-title">👤 Informations Passager</div>
+            <div class="passenger-info">
+                <div class="passenger-grid">
+                    <div class="passenger-row">
+                        <div class="passenger-cell">
+                            <div class="passenger-label">Nom Complet</div>
+                            <div class="passenger-value">{{ ticket.passager.nom }} {{ ticket.passager.prenom }}</div>
+                        </div>
+                        {% if ticket.passager.dateNaissance %}
+                            <div class="passenger-cell">
+                                <div class="passenger-label">Date de Naissance</div>
+                                <div class="passenger-value">{{ ticket.passager.dateNaissance|date('d/m/Y') }}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if ticket.passager.numeroPasseport or ticket.passager.nationalite %}
+                        <div class="passenger-row">
+                            {% if ticket.passager.numeroPasseport %}
+                                <div class="passenger-cell">
+                                    <div class="passenger-label">N° Passeport</div>
+                                    <div class="passenger-value">{{ ticket.passager.numeroPasseport }}</div>
+                                </div>
+                            {% endif %}
+                            {% if ticket.passager.nationalite %}
+                                <div class="passenger-cell">
+                                    <div class="passenger-label">Nationalité</div>
+                                    <div class="passenger-value">{{ ticket.passager.nationalite }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Reservation Information -->
+        <div class="section-title">📋 Détails de la Réservation</div>
+        <div class="reservation-info">
+            <div class="reservation-grid">
+                <div class="reservation-row">
+                    <div class="reservation-cell">
+                        <div class="passenger-label">Référence Réservation</div>
+                        <div style="font-family: 'Courier New'; font-size: 13pt; font-weight: bold; margin-top: 5px;">
+                            {{ ticket.reservation.reference }}
+                        </div>
+                    </div>
+                    <div class="reservation-cell">
+                        <div class="passenger-label">Date Réservation</div>
+                        <div style="font-size: 12pt; margin-top: 5px;">
+                            {{ ticket.reservation.dateRes|date('d/m/Y') }}
+                        </div>
+                    </div>
+                    <div class="reservation-cell">
+                        <div class="passenger-label">Date Émission</div>
+                        <div style="font-size: 12pt; margin-top: 5px;">
+                            {{ ticket.dateCreation|date('d/m/Y') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Placeholder -->
+        <div style="text-align: center; margin: 25px 0;">
+            <div class="qr-placeholder">QR</div>
+            <div style="font-size: 9pt; color: #666;">Scannez ce code à l'aéroport</div>
+        </div>
+
+        <!-- Barcode -->
+        <div class="barcode"></div>
+        <div class="barcode-number">{{ ticket.idTicket }}</div>
+
+        <!-- Important Information -->
+        <div class="important-box">
+            <div class="important-title">⚠ INFORMATIONS IMPORTANTES</div>
+            <div class="important-text">
+                <ul>
+                    <li><strong>Présentez-vous à l'aéroport au moins 2 heures avant le départ</strong></li>
+                    <li>Munissez-vous d'une pièce d'identité valide</li>
+                    <li>Ce billet est nominatif et non transférable</li>
+                    <li>Vérifiez les restrictions de bagages avant votre départ</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-title">Contact et Assistance</div>
+        <div class="footer-text">
+            Service Client : +216 XX XXX XXX<br>
+            Email : contact@aeromanager.com<br>
+            Site Web : www.aeromanager.com
+        </div>
+        <div class="footer-meta">
+            AeroManager - Système de Gestion de Vols<br>
+            Document généré le {{ 'now'|date('d/m/Y à H:i') }}
+        </div>
+    </div>
+</div>
+</body>
+</html>

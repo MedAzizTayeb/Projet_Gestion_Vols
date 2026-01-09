@@ -24,7 +24,7 @@ class VolType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('NumVol', TextType::class, [
+            ->add('numVol', TextType::class, [
                 'label' => 'Numéro de vol',
                 'attr' => [
                     'placeholder' => 'Ex: AF1234, TU456',
@@ -75,7 +75,7 @@ class VolType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('DateDepart', DateTimeType::class, [
+            ->add('dateDepart', DateTimeType::class, [
                 'label' => 'Date et heure de départ',
                 'widget' => 'single_text',
                 'attr' => [
@@ -88,7 +88,7 @@ class VolType extends AbstractType
                 ],
                 'help' => 'Date et heure de départ en temps local',
             ])
-            ->add('DateArrive', DateTimeType::class, [
+            ->add('dateArrive', DateTimeType::class, [
                 'label' => 'Date et heure d\'arrivée',
                 'widget' => 'single_text',
                 'attr' => [
@@ -184,7 +184,7 @@ class VolType extends AbstractType
         if ($vol->getDateArrive() && $vol->getDateDepart()) {
             if ($vol->getDateArrive() <= $vol->getDateDepart()) {
                 $context->buildViolation('La date d\'arrivée doit être après la date de départ')
-                    ->atPath('DateArrive')
+                    ->atPath('dateArrive')
                     ->addViolation();
             }
         }

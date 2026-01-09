@@ -1,247 +1,356 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails Administrateur - AeroManager</title>
+{% extends 'base.html.twig' %}
+
+{% block title %}Administrateur {{ administrateur.matricule }} - AeroManager{% endblock %}
+
+{% block body %}
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .admin-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
             color: white;
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .back-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateX(-5px);
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-header {
-            text-align: center;
+            padding: 2rem 0;
             margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 2px solid #e0e0e0;
         }
 
-        .card-header .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-header h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        .badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .badge-admin {
-            background: #667eea;
-            color: white;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-
-        .info-item {
-            background: #f8f9fa;
-            padding: 1.5rem;
+        .info-card {
+            background: white;
             border-radius: 15px;
-            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
         }
 
-        .info-label {
-            font-size: 0.85rem;
-            color: #666;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-
-        .info-value {
-            font-size: 1.3rem;
-            color: #333;
-            font-weight: 700;
-        }
-
-        .actions {
+        .info-row {
             display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 2px solid #e0e0e0;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
         }
 
-        .btn {
-            padding: 0.9rem 1.5rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+        .info-row:last-child {
+            border-bottom: none;
         }
 
-        .btn-edit {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .btn-edit:hover {
-            background: #e0a800;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 193, 7, 0.4);
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(220, 53, 69, 0.4);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
-        .delete-form {
-            flex: 1;
-        }
-
-        @media (max-width: 768px) {
-            .card {
-                padding: 2rem 1.5rem;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .actions {
-                flex-direction: column;
-            }
+        .badge-status {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
         }
     </style>
-</head>
-<body>
-<div class="container">
-    <a href="{{ path('app_administrateur_index') }}" class="back-link">← Retour à la liste</a>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="icon">👨‍💼</div>
-            <h1>Détails de l'Administrateur</h1>
-            <span class="badge badge-admin">Niveau {{ administrateur.niveauAcces }}</span>
+    <div class="admin-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user-shield"></i> Administrateur {{ administrateur.matricule }}</h1>
+                    <p class="mb-0 opacity-75">{{ administrateur.nomComplet }}</p>
+                </div>
+                <div>
+                    <a href="{{ path('app_administrateur_edit', {'id': administrateur.id}) }}" class="btn btn-warning me-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{{ path('app_administrateur_index') }}" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">ID</div>
-                <div class="info-value">#{{ administrateur.id }}</div>
+    <div class="container pb-5">
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row">
+            {# Colonne Gauche - Profil #}
+            <div class="col-lg-4">
+                {# Carte Profil #}
+                <div class="info-card text-center">
+                    <div class="display-1 text-primary mb-3">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3>{{ administrateur.nomComplet }}</h3>
+                    <p class="text-muted mb-3">{{ administrateur.email }}</p>
+
+                    <div class="mb-3">
+                        {% if administrateur.actif %}
+                            <span class="badge bg-success badge-status">
+                                <i class="fas fa-check-circle"></i> Compte Actif
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger badge-status">
+                                <i class="fas fa-times-circle"></i> Compte Inactif
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="badge bg-primary badge-status">
+                            <i class="fas fa-shield-alt"></i> Niveau {{ administrateur.niveauAcces }}
+                        </span>
+                    </div>
+
+                    {% if administrateur.departement %}
+                        <div class="mb-3">
+                            <span class="badge bg-info badge-status">
+                                <i class="fas fa-building"></i> {{ administrateur.departement }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <div class="border-top pt-3 mt-3">
+                        <div class="text-muted small">Matricule</div>
+                        <strong class="font-monospace">{{ administrateur.matricule }}</strong>
+                    </div>
+                </div>
+
+                {# Actions Rapides #}
+                <div class="info-card">
+                    <h5 class="mb-3"><i class="fas fa-cogs"></i> Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('app_administrateur_edit', {'id': administrateur.id}) }}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                        <a href="{{ path('app_administrateur_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list"></i> Liste complète
+                        </a>
+                    </div>
+                </div>
+
+                {# Statistiques #}
+                <div class="info-card">
+                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    <div class="row text-center g-3">
+                        <div class="col-6">
+                            <div class="border rounded p-3">
+                                <div class="h3 text-primary mb-0">{{ administrateur.volsCrees|length }}</div>
+                                <small class="text-muted">Vols Créés</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3">
+                                <div class="h3 text-success mb-0">{{ administrateur.avionsGeres|length }}</div>
+                                <small class="text-muted">Avions Gérés</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="info-item">
-                <div class="info-label">Matricule</div>
-                <div class="info-value">{{ administrateur.matricule }}</div>
-            </div>
+            {# Colonne Droite - Détails #}
+            <div class="col-lg-8">
+                {# Informations Personnelles #}
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-user text-primary"></i> Informations Personnelles
+                    </h5>
+                    <div class="info-row">
+                        <span class="text-muted">Nom Complet</span>
+                        <strong>{{ administrateur.prenom }} {{ administrateur.nom }}</strong>
+                    </div>
+                    <div class="info-row">
+                        <span class="text-muted">Email</span>
+                        <strong>{{ administrateur.email }}</strong>
+                    </div>
+                    <div class="info-row">
+                        <span class="text-muted">Téléphone</span>
+                        <strong>{{ administrateur.telephone ?: 'Non renseigné' }}</strong>
+                    </div>
+                    <div class="info-row">
+                        <span class="text-muted">Matricule</span>
+                        <strong class="font-monospace">{{ administrateur.matricule }}</strong>
+                    </div>
+                </div>
 
-            <div class="info-item">
-                <div class="info-label">Niveau d'Accès</div>
-                <div class="info-value">
-                    {% if administrateur.niveauAcces == 1 %}
-                        Basique
-                    {% elseif administrateur.niveauAcces == 2 %}
-                        Intermédiaire
-                    {% elseif administrateur.niveauAcces == 3 %}
-                        Complet
-                    {% else %}
-                        Niveau {{ administrateur.niveauAcces }}
+                {# Informations Professionnelles #}
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-briefcase text-success"></i> Informations Professionnelles
+                    </h5>
+                    <div class="info-row">
+                        <span class="text-muted">Département</span>
+                        <strong>{{ administrateur.departement ?: 'Non assigné' }}</strong>
+                    </div>
+                    <div class="info-row">
+                        <span class="text-muted">Niveau d'Accès</span>
+                        <span class="badge bg-primary">Niveau {{ administrateur.niveauAcces }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="text-muted">Statut du Compte</span>
+                        {% if administrateur.actif %}
+                            <span class="badge bg-success">Actif</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactif</span>
+                        {% endif %}
+                    </div>
+                    {% if administrateur.permissions %}
+                        <div class="info-row">
+                            <span class="text-muted">Permissions Spéciales</span>
+                            <span></span>
+                        </div>
+                        <div class="alert alert-info mt-2 mb-0">
+                            {{ administrateur.permissions }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Rôles et Autorisations #}
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-shield-alt text-warning"></i> Rôles et Autorisations
+                    </h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% for role in administrateur.roles %}
+                            <span class="badge bg-primary badge-status">
+                                {{ role }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Historique et Dates #}
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-history text-info"></i> Historique
+                    </h5>
+                    <div class="info-row">
+                        <span class="text-muted">Date de Création</span>
+                        <strong>{{ administrateur.dateCreation|date('d/m/Y à H:i') }}</strong>
+                    </div>
+                    <div class="info-row">
+                        <span class="text-muted">Dernière Connexion</span>
+                        <strong>
+                            {% if administrateur.dernierConnexion %}
+                                {{ administrateur.dernierConnexion|date('d/m/Y à H:i') }}
+                            {% else %}
+                                Jamais connecté
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="info-row">
+                        <span class="text-muted">Ancienneté</span>
+                        <strong>
+                            {% set diff = date('now').diff(administrateur.dateCreation) %}
+                            {% if diff.days > 365 %}
+                                {{ (diff.days / 365)|round }} an(s)
+                            {% elseif diff.days > 30 %}
+                                {{ (diff.days / 30)|round }} mois
+                            {% else %}
+                                {{ diff.days }} jour(s)
+                            {% endif %}
+                        </strong>
+                    </div>
+                </div>
+
+                {# Activités #}
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-tasks text-success"></i> Activités Récentes
+                    </h5>
+
+                    {% if administrateur.volsCrees|length > 0 %}
+                        <h6 class="text-muted small">Derniers Vols Créés</h6>
+                        <div class="list-group mb-3">
+                            {% for vol in administrateur.volsCrees|slice(0, 3) %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ vol.numVol }}</strong>
+                                        <small class="text-muted">{{ vol.dateDepart|date('d/m/Y') }}</small>
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ vol.depart.ville }} → {{ vol.arrivee.ville }}
+                                    </small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if administrateur.avionsGeres|length > 0 %}
+                        <h6 class="text-muted small">Avions Gérés</h6>
+                        <div class="list-group">
+                            {% for avion in administrateur.avionsGeres|slice(0, 3) %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ avion.modele }}</strong>
+                                        {% if avion.disponibilite %}
+                                            <span class="badge bg-success">Disponible</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Indisponible</span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">{{ avion.immatriculation }}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if administrateur.volsCrees|length == 0 and administrateur.avionsGeres|length == 0 %}
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            Aucune activité enregistrée pour cet administrateur.
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="actions">
-            <a href="{{ path('app_administrateur_edit', {'id': administrateur.id}) }}" class="btn btn-edit">
-                ✏️ Modifier
-            </a>
-
-            <a href="{{ path('app_administrateur_index') }}" class="btn btn-secondary">
-                📋 Liste
-            </a>
-
-            <form method="post" action="{{ path('app_administrateur_delete', {'id': administrateur.id}) }}" class="delete-form" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ administrateur.id) }}">
-                <button type="submit" class="btn btn-danger" style="width: 100%;">
-                    🗑️ Supprimer
-                </button>
-            </form>
+    {# Delete Modal #}
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle"></i> Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet administrateur ?</p>
+                    <div class="alert alert-danger">
+                        <strong>Attention :</strong> Cette action est irréversible !
+                    </div>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <strong>Matricule :</strong> {{ administrateur.matricule }}<br>
+                            <strong>Nom :</strong> {{ administrateur.nomComplet }}<br>
+                            <strong>Email :</strong> {{ administrateur.email }}<br>
+                            <strong>Vols créés :</strong> {{ administrateur.volsCrees|length }}<br>
+                            <strong>Avions gérés :</strong> {{ administrateur.avionsGeres|length }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+                    <form method="post" action="{{ path('app_administrateur_delete', {'id': administrateur.id}) }}" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ administrateur.id) }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer Définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-</body>
-</html>
+
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+{% endblock %}
